@@ -575,18 +575,53 @@ async function send(){
     window.open(`mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
     return;
   }
+
   setLoading(el.sendBtn,true);
+
+  // Soumission via formulaire caché — contourne les restrictions CORS
   try{
-    await fetch(CFG.gas,{
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'text/plain'},
-      body:JSON.stringify({to,subject,body,fields:d,imageBase64:S.imgB64||null,imageName:S.imgFile?.name||null}),
-    });
-    showSuccess(d);
-  }catch(e){ showToast('Erreur : '+(e.message||'Réessayez'),'error') }
-  finally{ setLoading(el.sendBtn,false) }
-  finally{ setLoading(el.sendBtn,false) }
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = CFG.gas;
+    form.target = 'hidden_iframe';
+    form.style.display = 'none';
+
+    const payload = {to,subject,body,fields:d,imageBase64:S.imgB64||null,imageName:S.imgFile?.name||null};
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'data';
+    input.value = JSON.stringify(payload);
+    form.appendChild(input);
+
+    // iframe caché pour recevoir la réponse sans redirection
+    let iframe = document.getElementById('hidden_iframe');
+    if(!iframe){
+      iframe = document.createElement('iframe');
+      iframe.name = 'hidden_iframe';
+      iframe.id = 'hidden_iframe';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+    }
+
+    iframe.onload = () => {
+      setLoading(el.sendBtn,false);
+      showSuccess(d);
+    };
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    // Timeout de sécurité
+    setTimeout(()=>{
+      setLoading(el.sendBtn,false);
+      showSuccess(d);
+    }, 3000);
+
+  }catch(e){
+    showToast('Erreur : '+(e.message||'Réessayez'),'error');
+    setLoading(el.sendBtn,false);
+  }
 }
 
 /* ── SUCCESS ── */
