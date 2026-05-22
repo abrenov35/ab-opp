@@ -203,13 +203,17 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
     <div class="capture-zone" id="modeImage">
       <div class="drop-zone" id="dropZone">
         <input type="file" id="fileInput" accept="image/*" capture="environment" hidden/>
+        <input type="file" id="fileInputGallery" accept="image/*" hidden/>
         <div class="drop-content" id="dropContent">
           <div class="drop-icon">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           </div>
-          <p class="drop-text">Touchez pour photographier<br/>ou choisir une image</p>
+          <p class="drop-text">Choisissez votre source</p>
           <p class="drop-sub">Carte de visite · Screenshot · Document</p>
-          <button class="pick-btn" id="pickFileBtn">Choisir un fichier</button>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button class="pick-btn" id="pickFileBtn">📷 Appareil photo</button>
+            <button class="pick-btn" id="pickGalleryBtn">🖼️ Galerie</button>
+          </div>
         </div>
         <div class="image-preview" id="imagePreview" hidden>
           <img id="previewImg" src="" alt="Aperçu"/>
@@ -349,6 +353,8 @@ function init(){
   el.modeBtns.forEach(b=>b.addEventListener('click',()=>switchMode(b.dataset.mode)));
   el.pickFileBtn.addEventListener('click',()=>el.fileInput.click());
   el.fileInput.addEventListener('change',e=>handleImg(e.target.files[0]));
+  document.getElementById('pickGalleryBtn').addEventListener('click',()=>document.getElementById('fileInputGallery').click());
+  document.getElementById('fileInputGallery').addEventListener('change',e=>handleImg(e.target.files[0]));
   el.dropZone.addEventListener('dragover',e=>{e.preventDefault();el.dropZone.classList.add('drag-over')});
   el.dropZone.addEventListener('dragleave',()=>el.dropZone.classList.remove('drag-over'));
   el.dropZone.addEventListener('drop',e=>{e.preventDefault();el.dropZone.classList.remove('drag-over');handleImg(e.dataTransfer.files[0])});
