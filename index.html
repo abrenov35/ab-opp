@@ -577,15 +577,15 @@ async function send(){
   }
   setLoading(el.sendBtn,true);
   try{
-    const res=await fetch(CFG.gas,{
+    await fetch(CFG.gas,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({to,subject,body,fields:d,imageBase64:S.imgB64||null,imageName:S.imgFile?.name||null}),
     });
-    const data=await res.json().catch(()=>({status:'ok'}));
-    if(data.status==='error') throw new Error(data.message||'Erreur envoi');
     showSuccess(d);
   }catch(e){ showToast('Erreur : '+(e.message||'Réessayez'),'error') }
+  finally{ setLoading(el.sendBtn,false) }
   finally{ setLoading(el.sendBtn,false) }
 }
 
