@@ -639,25 +639,6 @@ function showSuccess(d){
   showStep('success');
 }
 
-  const folderName = city ? name + ' - ' + city : name;
-  const fromPath = '/AB RENOV 35/CLIENTS AB RENOV 35/OPPORTUNITES/Modèle Dossier Client AB RENOV';
-  const toPath = '/AB RENOV 35/CLIENTS AB RENOV 35/OPPORTUNITES/' + folderName;
-  console.log('Dropbox copy from:', fromPath);
-  console.log('Dropbox copy to:', toPath);
-  try{
-    const res = await fetch('https://api.dropboxapi.com/2/files/copy_v2',{
-      method:'POST',
-      headers:{
-        'Authorization':'Bearer sl.u.AGgDANik43ZLqsFk1B1wBXOItMaoa7gk8iilvsWldYuMTRR2lNUkZzlSGfSwBQo5HKiv-jMhatjX0UT__W8XUaNkaciVEVjGuCI622vU1ppJQGl9fb9mPkY-cvhCzkoYGEWa7Yn-KaAKW8PAcYICMd6fxUgZ9rG30Q_GIqLw0e5E03gomT8CaPt3Ia3g_7UmG9aJWHXfF4duMZUZTmCmLZmdzHpYEQbpPmYu2RXkwcGOf0KWmRQJAa2I91YWQNZZH2dLtAVjRLNZvGyiI7m585dgIE-H_kdUskTeHBo5x8JZnsUzDPxL4-1YV1B5qaR_0s2VLKDr1bsW8NhS57aALRRucZtZIHAKYVNIe3DaFFB0YM-in_hepHg5Gyfd7-mEZCGrFiQYmU9DUyZsKR5MTLVCiW00qJCr_xu0rpczmuXyfcD1E71QsRCeAJrKv74tWRspB9iL2cc3CXbU5mxygkjWJm55uEGTbpZXBBpjF-C6S0MTpamF0NaIFlulusC_Lr1jzHRdLqA3TjXP-9zNjatcc93VoYJbws4i0oCm16herXBUzufvEnq-qOQobr3td9v1Vfyu5OIvdynqIc57y6PrTTpwr3MfSC_w-qn1KiupeH8VAzx-qlYjeld9ME4MnuZPPRYyVD4nZQsic6vKavs_gZ4ssM79PQiupvGmIigCWw65b8DklhG7ALckcRwKTOx1WWoqwH7lESfB5vIl58oOUTiEryG724YarDkB1ljFifl39uLaNuIFlMpSVe7xcHi8LUwgiF_qaWSYdYWdKXmfWf2gConaIIR4Ghpi5ULGXLNzwOiTC-0wlZolqNzUBi_1LLKg5k_rU8EYvDQ8FJJHbRqJLAaUbx_OtAiIr13ZgrBCw1kv0U0Uzaoj6G1vhPca9fhN3F2bERQNt6JHKXZBbom004NoQ7g3cdRsebP5LChyzHfL3hK3O0bx3ReI8OOotJ5g37H_Cnnl2jZbAcqivEab1St6LcU9ai3cYr4n2LizqlDowWqoS1n4EEAQDfLB-jpwIHsCPi3o-zRNXWXXQxKPnFsjpj1wm1_Pi5zWPDPmVNjYEYGOeXqc7yPx1BdhkZt4Q2rfw9zyVMpsAX-fy_gqy4NStMAth1XwaUG2Fe07EcSwbOPJOw0cKCluDjNBrA-V3DBeklfIRIvV1rnK57BrgAZRn-5Pq97hfYXtN2eK-rAEoAEn2YIzDhzoVod15uAas7O9mEk3B6UnLlaB88K9vAMM7cLhI6vFU5xVO-u1MyI72YmZ0SxZNdR0RPybW8lzPO0q0t9FC_ZAOELhT66T5GCso_XgfqWxaKi3xlfOGUlhEi4UeNZUf-elqiks-VJv5iOdYY5Zeo1_OSoKAqFlqbK2v6I_31AOofDVhvJqa7_NKo6ByEwRLwyNoZ2aCgK2EEVTGXLX8ekVnpZyExG2tTetBzjfOjxkmGyXSA',
-        'Content-Type':'application/json'
-      },
-      body:JSON.stringify({from_path:fromPath, to_path:toPath, autorename:true})
-    });
-    const data = await res.json();
-    console.log('Dropbox result:', JSON.stringify(data));
-  }catch(e){ console.log('Dropbox error:', e); }
-}
-
 /* ── RESET ── */
 function reset(){
   S={mode:'text',imgFile:null,imgB64:null,imgMime:'image/jpeg',voiceOn:false,recognition:null,rawText:'',extracted:{}};
