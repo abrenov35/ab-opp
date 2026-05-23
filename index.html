@@ -600,6 +600,7 @@ async function send(){
 
 /* ── SUCCESS ── */
 function showSuccess(d){
+  createDropboxFolder(d);
   const name=[d.prenom,d.nom].filter(Boolean).join(' ')||'—';
   el.successMeta.innerHTML=[
     `<strong>${name}</strong>`,
@@ -609,6 +610,25 @@ function showSuccess(d){
     d.projet?`🔧 ${d.projet}`:'',
   ].filter(Boolean).join('<br>');
   showStep('success');
+}
+
+/* ── DROPBOX ── */
+async function createDropboxFolder(d){
+  const name = [d.prenom, d.nom].filter(Boolean).join(' ');
+  const city  = d.ville || '';
+  if(!name) return;
+  const folderName = city ? `${name} - ${city}` : name;
+  const path = '/' + folderName;
+  try{
+    await fetch('https://api.dropboxapi.com/2/files/create_folder_v2',{
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer sl.u.AGgq939HxFmNE23O01EznTxPbs9nn9z0_sO8dZDOArFIpLLj5dMzh5xziwn3vZ6eXfOBYnuCKvQUc2F-9dzYPH9JdE4OTFnN4P5LtD89t772-5yCmFkJdcr19YRmOPrb6a7MW1crL0POLZlfUhvs-ugbzhIX5PPLnFSu8HinlqtQ7RwFmuIYiKSF0r6uufj6e0tNp_i3VKa8ABJIdzK71dnzd6WQaQhBBNlrkJxJohD6f14n7Uh4n3g95K6kN8UsnoF71b2Nr2ZV5cXX7iI-YrvNUINPoPapJ3_4d-TinlE-NFAnXOIkDo3V1jx5rTU_lbl1rDSobNoQUbe6436JNW9Llt0uQxx7Lhq8wWJhsc5TCa4W6Nmh0yyz2NQxkYQOiKjej6SMT6DA7OPtPxGuvYqKzuIiOSsQdTLrtvJTE26cf6LSixCJyLO7tT11PUnbbQx7pGn_0W-2BCJnrLkjmTjV1ekVEJQNsly6-nN-hG-OyMogjxGtet3diT86NV9PjCG5cYfUOt5Y-tBNyY3vwCmw1I0O6SiCNWpMQWeyiqbJR4Ax8fuJewgtP4ko2qGH7-dazVlaMvkXVIy3mnVhTVQzja5eC2B0FSXS-eGQAN44FuXgf9s34f5M8SB7O5gK6ycbtnIFOVfeV0ibrq4m-z_evjkSwobQOu_BaRQRCbeHetYUCht4ziPSdyVezHL_v-SMV8ZrONlf4Gm2hOWu3RJX0VhPu1o5M3lMERbymppy3nWhnIs4-Qf_cFjO16dg1WDmSGYvBzIzlJf3YmFG4qs5Oq3hlzUdGK2n18D80Bdu_zS58xbnvH1bY0e-ydmKOqUkFHN_pAx-j4ON8IWk7s09TZ3DzzgHLuIgMDZvhv7f8dn0ICvkhVblnGypeHoOFcX2bp6umHZZOjnK-hT0CDaH9RncY6qwyuATYvvoruVnD7_B5mHlKAttdBJGQW7SxJ79uNCq8jyWsyL0mq8tnz_1ix9DwRpAiaj26qZ_S68P_K9TW0s3_FJrNOu5Gzu6xb0GigHv4oqcTZqPLZBUL-fHHpBiM-tnb7fhyf-xYRgVUPMdlpdPMo6Wn06YSo-iu08XGiYeoc9biHTb0s7EHgpdPqkbrC8J6JFvuor7_YvhncO4aZMW88t0MYWiQJiftS8flQEmvysGDkuZGf0-jCrjXpJz9vgDiptNcBWlhqNVC86e7vtJylbpBSj-vnehqpOaCTkNyzZgFTwGPpAqX5HENpDBDLCYStpfq3jaJ7RspPvtFr7QiJO2p4CH4VLvJXmRfz9x5CObHksqATWNHrShVCYg6L7qKOq5jsZpZBFHMNpoFf6AUb8UXoEsopKGP_tVd5CZ9WJmMT1bn7XRrXGZofZcg8_vP0eE82dXtzkHGzuqliRPy7NKbUklzU8u6sgoaOjGqBmExEoyxR8xTqe-4lejaoTdkRNGgANl-BM-3g',
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({path, autorename:true})
+    });
+  }catch(e){ console.log('Dropbox error:', e); }
 }
 
 /* ── RESET ── */
