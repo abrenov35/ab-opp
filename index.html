@@ -391,7 +391,7 @@ function init(){
     }
   });
 
-  
+  if(!CFG.key) setTimeout(()=>showToast('⚙️ Configurez votre clé Gemini (gratuite) dans les paramètres','neutral',5000),900);
 }
 
 /* ── MODE ── */
@@ -523,18 +523,17 @@ Règles :
   const content=[];
   if(S.rawText) content.push({type:'text',text:S.rawText});
   if(S.imgB64){
-    content.push({type:'image',source:{type:'base64',media_type:S.imgMime,data:S.imgB64}});
+    content.push({type:'image_url',image_url:{url:`data:${S.imgMime};base64,${S.imgB64}`,detail:'high'}});
     if(!S.rawText) content.push({type:'text',text:'Analyse cette image et extrais les informations.'});
   }
 
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
+  const res=await fetch('https://cool-cell-9dbd.abrenov35.workers.dev',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
+      model:'gpt-4o',
       max_tokens:600,
-      system:SYS,
-      messages:[{role:'user',content}]
+      messages:[{role:'system',content:SYS},{role:'user',content}]
     }),
   });
 
@@ -544,7 +543,7 @@ Règles :
   }
 
   const data=await res.json();
-  const raw=data.content?.[0]?.text||'{}';
+  const raw=data.choices?.[0]?.message?.content||'{}';
   // Nettoyage robuste de la réponse
   let cleaned = raw.replace(/```json|```/g,'').trim();
   // Extraire uniquement le JSON si du texte précède
@@ -655,7 +654,7 @@ async function createDropboxFolder(d){
     const res = await fetch('https://api.dropboxapi.com/2/files/copy_v2',{
       method:'POST',
       headers:{
-        'Authorization':'Bearer sl.u.AGgDANik43ZLqsFk1B1wBXOItMaoa7gk8iilvsWldYuMTRR2lNUkZzlSGfSwBQo5HKiv-jMhatjX0UT__W8XUaNkaciVEVjGuCI622vU1ppJQGl9fb9mPkY-cvhCzkoYGEWa7Yn-KaAKW8PAcYICMd6fxUgZ9rG30Q_GIqLw0e5E03gomT8CaPt3Ia3g_7UmG9aJWHXfF4duMZUZTmCmLZmdzHpYEQbpPmYu2RXkwcGOf0KWmRQJAa2I91YWQNZZH2dLtAVjRLNZvGyiI7m585dgIE-H_kdUskTeHBo5x8JZnsUzDPxL4-1YV1B5qaR_0s2VLKDr1bsW8NhS57aALRRucZtZIHAKYVNIe3DaFFB0YM-in_hepHg5Gyfd7-mEZCGrFiQYmU9DUyZsKR5MTLVCiW00qJCr_xu0rpczmuXyfcD1E71QsRCeAJrKv74tWRspB9iL2cc3CXbU5mxygkjWJm55uEGTbpZXBBpjF-C6S0MTpamF0NaIFlulusC_Lr1jzHRdLqA3TjXP-9zNjatcc93VoYJbws4i0oCm16herXBUzufvEnq-qOQobr3td9v1Vfyu5OIvdynqIc57y6PrTTpwr3MfSC_w-qn1KiupeH8VAzx-qlYjeld9ME4MnuZPPRYyVD4nZQsic6vKavs_gZ4ssM79PQiupvGmIigCWw65b8DklhG7ALckcRwKTOx1WWoqwH7lESfB5vIl58oOUTiEryG724YarDkB1ljFifl39uLaNuIFlMpSVe7xcHi8LUwgiF_qaWSYdYWdKXmfWf2gConaIIR4Ghpi5ULGXLNzwOiTC-0wlZolqNzUBi_1LLKg5k_rU8EYvDQ8FJJHbRqJLAaUbx_OtAiIr13ZgrBCw1kv0U0Uzaoj6G1vhPca9fhN3F2bERQNt6JHKXZBbom004NoQ7g3cdRsebP5LChyzHfL3hK3O0bx3ReI8OOotJ5g37H_Cnnl2jZbAcqivEab1St6LcU9ai3cYr4n2LizqlDowWqoS1n4EEAQDfLB-jpwIHsCPi3o-zRNXWXXQxKPnFsjpj1wm1_Pi5zWPDPmVNjYEYGOeXqc7yPx1BdhkZt4Q2rfw9zyVMpsAX-fy_gqy4NStMAth1XwaUG2Fe07EcSwbOPJOw0cKCluDjNBrA-V3DBeklfIRIvV1rnK57BrgAZRn-5Pq97hfYXtN2eK-rAEoAEn2YIzDhzoVod15uAas7O9mEk3B6UnLlaB88K9vAMM7cLhI6vFU5xVO-u1MyI72YmZ0SxZNdR0RPybW8lzPO0q0t9FC_ZAOELhT66T5GCso_XgfqWxaKi3xlfOGUlhEi4UeNZUf-elqiks-VJv5iOdYY5Zeo1_OSoKAqFlqbK2v6I_31AOofDVhvJqa7_NKo6ByEwRLwyNoZ2aCgK2EEVTGXLX8ekVnpZyExG2tTetBzjfOjxkmGyXSA',
+        'Authorization':'Bearer sl.u.AGj9NQm7GqCfD6ZaLHX8qDj9vZEPtBu8Y2ixHCETVf6PrVVCHq5sNmwi_PAezjRIE5UKDQ9f0_E6buJZMtALlxzj2r-EdcEr4n4VxEm16W0WFc_8ZyTcwAnU3qAkgKV_5MyKpoPKVv7N4RHUGgnMbo9zZJuepTXxjuw4JnDCFXOkpeH1vXSlm1pSQhC8-3x4knWqNpj0zvmNlG05r0334v2Lc4DqmxFiofn-2vyu8UdES7wDQ4u9siexQYufCEY1RIwXbsIKnwOdWAKzHvyNy8SuoVVXdqRs8SOq5alTdvjsEt0U0qm4jr3_TxPlu22qgMgy4_FnLIqWLkDKlP5AnD1dKr1DHJcE8YA-CPfuYctrYbIpCD5WlquNbevcukxFH6WgHYNz7kDB-GVBPGnicZjZvXJyRn-fajuv6R-UTifci5C7Brb8DgiR8VdDR9RIo2UMlZnoaI-WBekPeQCGRj-dogWmOnsfzForwWt-R1ZBCFvFh3frVPJQSDKSUp9YhB1uJTRTyjKr7e4aY-15HiF7wRQ-wVn7cALikBN2ldLPL2OohqQy7EMU3BvEE4crLn2CkPB-vGXoI5oxLW8Fn_QgoXW7iwWdSnD_Iv-ihSbyhOviU_wAQsT9LUFjUCtp-tDJ0huchpPKSQLHisI12DeabTxgs13XuBP-vMWuO4SK7rbErB0CJW1sWXFV5hK_4g4pwFQlwhzNoSyns9cMewB5K4iDTiysmQR2bsA7Om6E-_pWqXvCDIBlrMNLubDIapJpbgvSYrCOgkN6rA9ew94vFqCUM-yS4k9Kga0mLikRe6QQ5dOfVoPCR_HlNQo8BoNnC6aP-Z-XR4lOrNV97Sut50QbN_f7QNjY6lnX_v6DndYuF2-SO654zzAGaWYsmuTnJTXvbnc5PnEmU5Qb7meWt7P1gbhoQconfYgOFE--39vVA0J70LPEL22dOxnwBBPZ2ZybYZo0rQ3htR8yzRIgERkDZUHe_rJ3tpzyWTSIwxe_WC7g2fRZfFMV8Qh312ZwEHd5qLMK28vyx9G0y4nslGYB8NEBGCwNC0vv7h-dTWTeUFWadx5YBkilVfe1u_13I3YjV6feLWI1QV5oWaKMAeVWwV5XBqf_6RM_h53fT1mP_Ks_lX5gPiRHAWVQkIpJtTiBHgH8A0YJ01jTdrVbAPEWMebjjqnvbM6sytfvGO1Aojw2IN76J_AV0Tygd8RTRw2Zccv1th6NGhK2jZAxwauP6F1j9WeW7whZRbcg4umMSvS5Ey0oOCQRB1w5NRrF2oo6fpBJ4vkHDZQjH9_cmBnhvNAytIQyQRFo7HTwwl-clNiVTJKrLlTNmFLXWbRWH_wA4O5_kRUVO8hddd2rE9c0hQ6jjuqTMhBVg6hJhTaFD2LTFYQ4Z-GA0KF5lH1mSRpeKqyswAbt6U4Cyd-idXjQVq37ZjviIvrqwq6l4w',
         'Content-Type':'application/json'
       },
       body:JSON.stringify({from_path:fromPath, to_path:toPath, autorename:true})
