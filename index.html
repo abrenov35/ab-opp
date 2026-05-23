@@ -657,8 +657,8 @@ async function createDropboxFolder(d){
   const city = d.ville || '';
   if(!name){ console.log('Dropbox: pas de nom'); return; }
   const folderName = city ? name + ' - ' + city : name;
-  const fromPath = '/AB RENOV 35/CLIENTS AB RENOV 35/• OPPORTUNITES/Modèle Dossier Client AB RENOV';
-  const toPath = '/AB RENOV 35/CLIENTS AB RENOV 35/• OPPORTUNITES/' + folderName;
+  const fromPath = '/AB RENOV 35/CLIENTS AB RENOV 35/OPPORTUNITES/Modèle Dossier Client AB RENOV';
+  const toPath = '/AB RENOV 35/CLIENTS AB RENOV 35/OPPORTUNITES/' + folderName;
   console.log('Dropbox copy from:', fromPath);
   console.log('Dropbox copy to:', toPath);
   try{
