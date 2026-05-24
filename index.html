@@ -149,11 +149,6 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
     </div>
     <div>
       <div class="field-group" style="margin-bottom:16px">
-        <label class="field-label">Clé API OpenAI</label>
-        <input type="password" id="openaiKey" class="field-input" placeholder="sk-..." autocomplete="off"/>
-        <p class="field-hint">Sur <strong>platform.openai.com</strong> · Stockée localement uniquement.</p>
-      </div>
-      <div class="field-group" style="margin-bottom:16px">
         <label class="field-label">URL Google Apps Script</label>
         <input type="url" id="gasUrl" class="field-input" placeholder="https://script.google.com/macros/s/.../exec"/>
         <p class="field-hint">Pour l'envoi email via votre Gmail.</p>
@@ -163,10 +158,8 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
         <input type="email" id="vertuozaEmail" class="field-input" value="opportunite+891172@vertuoza.com"/>
       </div>
       <div class="api-info">
-        <p>💡 <strong>100 % gratuit avec Google :</strong><br/>
-        1. Allez sur <a href="https://platform.openai.com/api-keys/app/apikey" target="_blank">platform.openai.com/api-keys</a><br/>
-        2. Cliquez "Get API key" → Créez une clé gratuite<br/>
-        3. Collez-la ci-dessus · Limite : 1 500 requêtes/jour</p>
+        <p>✅ <strong>IA intégrée — aucune clé API requise.</strong><br/>
+        L'analyse est effectuée via Claude (Anthropic), directement intégré à cette application.</p>
       </div>
       <button class="save-settings-btn" id="saveSettings">ENREGISTRER</button>
     </div>
@@ -329,7 +322,6 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
 <script>
 /* ── CONFIG ── */
 const CFG = {
-  get key()   { return localStorage.getItem("abr_openai_key") || "" },
   get gas()   { return localStorage.getItem('abr_gas_url') || '' },
   get email() { return localStorage.getItem('abr_email') || 'opportunite+891172@vertuoza.com' },
 };
@@ -358,13 +350,12 @@ const el={
   successMeta:$('successMeta'),
   settingsBtn:$('settingsBtn'), settingsOverlay:$('settingsOverlay'),
   closeSettings:$('closeSettings'), saveSettings:$('saveSettings'),
-  openaiKey:$('openaiKey'), gasUrl:$('gasUrl'), vertuozaEmail:$('vertuozaEmail'),
+  gasUrl:$('gasUrl'), vertuozaEmail:$('vertuozaEmail'),
   toast:$('toast'),
 };
 
 /* ── INIT ── */
 function init(){
-  el.openaiKey.value = CFG.key;
   el.gasUrl.value = CFG.gas;
   el.vertuozaEmail.value = CFG.email;
 
@@ -386,9 +377,9 @@ function init(){
   el.sendBtn.addEventListener('click',send);
   el.newBtn.addEventListener('click',reset);
   el.settingsBtn.addEventListener('click',openSettings);
-  el.closeSettings.addEventListener('click',closeSettings);
-  el.settingsOverlay.addEventListener('click',e=>{if(e.target===el.settingsOverlay)closeSettings()});
-  el.saveSettings.addEventListener('click',saveSettings);
+  el.closeSettings.addEventListener('click',closeSettingsPanel);
+  el.settingsOverlay.addEventListener('click',e=>{if(e.target===el.settingsOverlay)closeSettingsPanel()});
+  el.saveSettings.addEventListener('click',saveSettingsData);
 
   document.addEventListener('paste',e=>{
     const items=e.clipboardData?.items;
@@ -400,21 +391,17 @@ function init(){
       }
     }
   });
-
-  if(!CFG.key) setTimeout(()=>showToast('⚙️ Configurez votre clé Gemini (gratuite) dans les paramètres','neutral',5000),900);
 }
 
 /* ── MODE ── */
 function switchMode(m){
   S.mode=m;
   el.modeBtns.forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
-  // Cacher toutes les zones
   el.modeText.classList.remove('active');
   el.modeImage.classList.remove('active');
   el.modeVoice.classList.remove('active');
   const mf=document.getElementById('modeFichier');
   if(mf) mf.classList.remove('active');
-  // Afficher la bonne zone
   if(m==='text') el.modeText.classList.add('active');
   else if(m==='image') el.modeImage.classList.add('active');
   else if(m==='voice') el.modeVoice.classList.add('active');
@@ -441,11 +428,10 @@ function clearImg(){
   el.fileInput.value='';
 }
 
-/* ── VOICE (Web Speech API — 100% gratuit, natif navigateur) ── */
+/* ── VOICE ── */
 function toggleVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){showToast('Reconnaissance vocale non supportée sur ce navigateur','error');return}
-
   if(S.voiceOn){
     S.recognition && S.recognition.stop();
     S.voiceOn=false;
@@ -454,15 +440,12 @@ function toggleVoice(){
     el.voiceWaves.classList.remove('active');
     return;
   }
-
   const rec=new SR();
   rec.lang='fr-FR'; rec.continuous=true; rec.interimResults=true;
   S.recognition=rec; S.voiceOn=true;
-
   el.voiceBtn.classList.add('recording');
   el.voiceStatus.textContent='Enregistrement... Appuyez pour arrêter';
   el.voiceWaves.classList.add('active');
-
   rec.onresult=e=>{
     let final='', interim='';
     for(let i=e.resultIndex;i<e.results.length;i++){
@@ -479,9 +462,7 @@ function toggleVoice(){
     el.voiceStatus.textContent='Appuyez pour dicter';
     el.voiceWaves.classList.remove('active');
   };
-  rec.onend=()=>{
-    if(S.voiceOn){ rec.start(); } // keep running
-  };
+  rec.onend=()=>{ if(S.voiceOn){ rec.start(); } };
   rec.start();
   showToast('Dictée démarrée — parlez !','success');
 }
@@ -492,7 +473,6 @@ function collectInput(){
   if(S.mode==='text'&&el.textInput.value.trim()) parts.push(el.textInput.value.trim());
   if(S.mode==='voice'&&el.voiceTranscript.value.trim()) parts.push(el.voiceTranscript.value.trim());
   if(el.quickNote.value.trim()) parts.push('Note : '+el.quickNote.value.trim());
-  // Also include text if image mode has text too
   if(S.mode==='image'&&el.textInput.value.trim()) parts.push(el.textInput.value.trim());
   return parts.join('\n\n');
 }
@@ -501,11 +481,10 @@ function hasInput(){ return !!(el.textInput.value.trim()||el.voiceTranscript.val
 /* ── ANALYZE ── */
 async function analyze(){
   if(!hasInput()){ showToast("Veuillez saisir du texte ou une image",'error'); return }
-  if(!CFG.key){ showToast('Clé API OpenAI manquante → Paramètres','error'); openSettings(); return }
   setLoading(el.analyzeBtn,true);
   S.rawText=collectInput();
   try{
-    const d=await callOpenAI();
+    const d=await callClaude();
     S.extracted=d;
     populate(d);
     showStep('result');
@@ -515,9 +494,9 @@ async function analyze(){
   }finally{ setLoading(el.analyzeBtn,false) }
 }
 
-/* ── OPENAI API ── */
-async function callOpenAI(){
-  const SYS=`Tu es un assistant commercial expert en rénovation et aménagement intérieur.
+/* ── CLAUDE API (Anthropic) ── */
+async function callClaude(){
+  const SYS = `Tu es un assistant commercial expert en rénovation et aménagement intérieur.
 Analyse le contenu fourni et extrais les informations de contact et de projet.
 Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, sans backticks, sans explication.
 
@@ -531,39 +510,56 @@ Règles :
 - Normalise les numéros de téléphone au format français (ex: 06 12 34 56 78)
 - Si une information est absente, laisse la chaîne vide`;
 
-  const content=[];
-  if(S.rawText) content.push({type:'text',text:S.rawText});
+  // Construire le contenu du message
+  const userContent = [];
+
   if(S.imgB64){
-    content.push({type:'image_url',image_url:{url:`data:${S.imgMime};base64,${S.imgB64}`,detail:'high'}});
-    if(!S.rawText) content.push({type:'text',text:'Analyse cette image et extrais les informations.'});
+    userContent.push({
+      type: 'image',
+      source: {
+        type: 'base64',
+        media_type: S.imgMime,
+        data: S.imgB64
+      }
+    });
   }
 
-  const res=await fetch('https://api.openai.com/v1/chat/completions',{
-    method:'POST',
-    headers:{'Authorization':`Bearer ${CFG.key}`,'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'gpt-4o',
-      max_tokens:600,
-      messages:[{role:'system',content:SYS},{role:'user',content}]
-    }),
+  if(S.rawText){
+    userContent.push({ type: 'text', text: S.rawText });
+  } else if(S.imgB64){
+    userContent.push({ type: 'text', text: 'Analyse cette image et extrais les informations.' });
+  }
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 600,
+      system: SYS,
+      messages: [{ role: 'user', content: userContent }]
+    })
   });
 
   if(!res.ok){
-    const e=await res.json().catch(()=>({}));
-    throw new Error(e.error?.message||`Erreur API ${res.status}`);
+    const e = await res.json().catch(()=>({}));
+    throw new Error(e.error?.message || `Erreur API ${res.status}`);
   }
 
-  const data=await res.json();
-  const raw=data.choices?.[0]?.message?.content||'{}';
-  // Nettoyage robuste de la réponse
+  const data = await res.json();
+  const raw = data.content?.[0]?.text || '{}';
+
+  // Nettoyage robuste
   let cleaned = raw.replace(/```json|```/g,'').trim();
-  // Extraire uniquement le JSON si du texte précède
   const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
   if(jsonMatch) cleaned = jsonMatch[0];
+
   try {
     return JSON.parse(cleaned);
   } catch(e) {
-    // Si toujours invalide, retourner objet vide
     return {prenom:'',nom:'',telephone:'',email:'',adresse:'',ville:'',code_postal:'',type_projet:'',commentaires:'',directives:'',confidence:30};
   }
 }
@@ -614,19 +610,15 @@ async function send(){
   const to=CFG.email;
   const subject=buildSubject(d);
   const body=buildBody(d);
-
   const gasUrl = CFG.gas || 'https://script.google.com/macros/s/AKfycbwxdvMx_l2hXVhpc_CFPwDfO5oN0XwUBhPoelrbv6uii5mMhe7r-k3JPNA28ljeX3yWkw/exec';
-
   setLoading(el.sendBtn,true);
   try{
-    // Envoi via fetch no-cors — fonctionne avec Apps Script
     fetch(gasUrl,{
       method:'POST',
       mode:'no-cors',
       headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({to,subject,body,fields:d,imageBase64:S.imgB64||null,imageName:S.imgFile?.name||null}),
     }).catch(()=>{});
-    // On affiche le succès immédiatement sans attendre la réponse
     setTimeout(()=>{
       setLoading(el.sendBtn,false);
       showSuccess(d);
@@ -659,8 +651,6 @@ async function createDropboxFolder(d){
   const folderName = city ? name + ' - ' + city : name;
   const fromPath = '/AB RENOV 35/CLIENTS AB RENOV 35/OPPORTUNITES/Modèle Dossier Client AB RENOV';
   const toPath = '/AB RENOV 35/CLIENTS AB RENOV 35/OPPORTUNITES/' + folderName;
-  console.log('Dropbox copy from:', fromPath);
-  console.log('Dropbox copy to:', toPath);
   try{
     const res = await fetch('https://api.dropboxapi.com/2/files/copy_v2',{
       method:'POST',
@@ -685,13 +675,12 @@ function reset(){
 }
 
 /* ── SETTINGS ── */
-function openSettings(){ el.settingsOverlay.classList.add('open'); el.openaiKey.value=CFG.key; el.gasUrl.value=CFG.gas; el.vertuozaEmail.value=CFG.email; }
-function closeSettings(){ el.settingsOverlay.classList.remove('open') }
-function saveSettings(){
-  localStorage.setItem('abr_openai_key', el.openaiKey.value.trim());
+function openSettings(){ el.settingsOverlay.classList.add('open'); el.gasUrl.value=CFG.gas; el.vertuozaEmail.value=CFG.email; }
+function closeSettingsPanel(){ el.settingsOverlay.classList.remove('open') }
+function saveSettingsData(){
   localStorage.setItem('abr_gas_url', el.gasUrl.value.trim());
   localStorage.setItem('abr_email', el.vertuozaEmail.value.trim()||'opportunite+891172@vertuoza.com');
-  closeSettings(); showToast('Paramètres enregistrés ✓','success');
+  closeSettingsPanel(); showToast('Paramètres enregistrés ✓','success');
 }
 
 /* ── UI HELPERS ── */
