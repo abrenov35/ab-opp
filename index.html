@@ -368,8 +368,7 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
 <script>
 /* ── CONFIG ── */
 const CFG = {
-
-  get gas()   { return localStorage.getItem('abr_gas_url') || '' },
+  get gas()   { return localStorage.getItem('abr_gas_url') || 'https://script.google.com/macros/s/AKfycbwxdvMx_l2hXVhpc_CFPwDfO5oN0XwUBhPoelrbv6uii5mMhe7r-k3JPNA28ljeX3yWkw/exec' },
   get email() { return localStorage.getItem('abr_email') || 'opportunite+891172@vertuoza.com' },
 };
 
@@ -770,6 +769,7 @@ async function doSend(d){
 /* ── SUCCESS ── */
 async function showSuccess(d){
   const dbResult = await createDropboxFolder(d);
+  console.log('dbResult:', JSON.stringify(dbResult));
   
   // Upload PJ si dossier créé
   let pjMsg = '';
