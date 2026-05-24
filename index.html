@@ -549,6 +549,7 @@ Règles :
   }
 
   const data = await res.json();
+  console.log('Réponse Worker:', JSON.stringify(data).slice(0, 300));
   const raw = data.content?.[0]?.text || '{}';
 
   let cleaned = raw.replace(/```json|```/g,'').trim();
