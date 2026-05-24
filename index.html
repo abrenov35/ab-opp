@@ -352,13 +352,12 @@ const el={
   successMeta:$('successMeta'),
   settingsBtn:$('settingsBtn'), settingsOverlay:$('settingsOverlay'),
   closeSettings:$('closeSettings'), saveSettings:$('saveSettings'),
-  anthropicKey:$('anthropicKey'), gasUrl:$('gasUrl'), vertuozaEmail:$('vertuozaEmail'),
+  gasUrl:$('gasUrl'), vertuozaEmail:$('vertuozaEmail'),
   toast:$('toast'),
 };
 
 /* ── INIT ── */
 function init(){
-  el.anthropicKey.value = CFG.key;
   el.gasUrl.value = CFG.gas;
   el.vertuozaEmail.value = CFG.email;
 
@@ -671,10 +670,9 @@ function reset(){
 }
 
 /* ── SETTINGS ── */
-function openSettings(){ el.settingsOverlay.classList.add('open'); el.anthropicKey.value=CFG.key; el.gasUrl.value=CFG.gas; el.vertuozaEmail.value=CFG.email; }
+function openSettings(){ el.settingsOverlay.classList.add('open'); el.gasUrl.value=CFG.gas; el.vertuozaEmail.value=CFG.email; }
 function closeSettingsPanel(){ el.settingsOverlay.classList.remove('open') }
 function saveSettingsData(){
-  localStorage.setItem('abr_anthropic_key', el.anthropicKey.value.trim());
   localStorage.setItem('abr_gas_url', el.gasUrl.value.trim());
   localStorage.setItem('abr_email', el.vertuozaEmail.value.trim()||'opportunite+891172@vertuoza.com');
   closeSettingsPanel(); showToast('Paramètres enregistrés ✓','success');
