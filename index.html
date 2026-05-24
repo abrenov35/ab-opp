@@ -148,11 +148,7 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
       <button class="close-btn" id="closeSettings">✕ Fermer</button>
     </div>
     <div>
-      <div class="field-group" style="margin-bottom:16px">
-        <label class="field-label">Clé API Anthropic (Claude)</label>
-        <input type="password" id="anthropicKey" class="field-input" placeholder="sk-ant-..." autocomplete="off"/>
-        <p class="field-hint">Sur <strong>console.anthropic.com</strong> → API Keys · Stockée localement uniquement.</p>
-      </div>
+
       <div class="field-group" style="margin-bottom:16px">
         <label class="field-label">URL Google Apps Script</label>
         <input type="url" id="gasUrl" class="field-input" placeholder="https://script.google.com/macros/s/.../exec"/>
@@ -163,10 +159,8 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
         <input type="email" id="vertuozaEmail" class="field-input" value="opportunite+891172@vertuoza.com"/>
       </div>
       <div class="api-info">
-        <p>🔑 <strong>Clé API Anthropic :</strong><br/>
-        1. Allez sur <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com/settings/keys</a><br/>
-        2. Cliquez "Create Key" · Copiez la clé <code>sk-ant-...</code><br/>
-        3. Collez-la ci-dessus · Elle est stockée uniquement dans votre navigateur.</p>
+        <p>✅ <strong>IA intégrée — aucune clé API requise.</strong><br/>
+        L'analyse est effectuée via Claude (Anthropic) de façon sécurisée.</p>
       </div>
       <button class="save-settings-btn" id="saveSettings">ENREGISTRER</button>
     </div>
@@ -329,7 +323,7 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
 <script>
 /* ── CONFIG ── */
 const CFG = {
-  get key()   { return localStorage.getItem('abr_anthropic_key') || '' },
+
   get gas()   { return localStorage.getItem('abr_gas_url') || '' },
   get email() { return localStorage.getItem('abr_email') || 'opportunite+891172@vertuoza.com' },
 };
@@ -401,7 +395,7 @@ function init(){
     }
   });
 
-  if(!CFG.key) setTimeout(()=>showToast('⚙️ Configurez votre clé API Anthropic dans les paramètres','neutral',5000),900);
+
 }
 
 /* ── MODE ── */
@@ -492,7 +486,7 @@ function hasInput(){ return !!(el.textInput.value.trim()||el.voiceTranscript.val
 /* ── ANALYZE ── */
 async function analyze(){
   if(!hasInput()){ showToast("Veuillez saisir du texte ou une image",'error'); return }
-  if(!CFG.key){ showToast('Clé API Anthropic manquante → Paramètres','error'); openSettings(); return }
+
   setLoading(el.analyzeBtn,true);
   S.rawText=collectInput();
   try{
@@ -537,13 +531,10 @@ Règles :
     userContent.push({ type: 'text', text: 'Analyse cette image et extrais les informations.' });
   }
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('https://cool-cell-9dbd.abrenov35.workers.dev', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': CFG.key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
