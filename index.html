@@ -149,6 +149,11 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
     </div>
     <div>
       <div class="field-group" style="margin-bottom:16px">
+        <label class="field-label">Clé API Anthropic (Claude)</label>
+        <input type="password" id="anthropicKey" class="field-input" placeholder="sk-ant-..." autocomplete="off"/>
+        <p class="field-hint">Sur <strong>console.anthropic.com</strong> → API Keys · Stockée localement uniquement.</p>
+      </div>
+      <div class="field-group" style="margin-bottom:16px">
         <label class="field-label">URL Google Apps Script</label>
         <input type="url" id="gasUrl" class="field-input" placeholder="https://script.google.com/macros/s/.../exec"/>
         <p class="field-hint">Pour l'envoi email via votre Gmail.</p>
@@ -158,8 +163,10 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
         <input type="email" id="vertuozaEmail" class="field-input" value="opportunite+891172@vertuoza.com"/>
       </div>
       <div class="api-info">
-        <p>✅ <strong>IA intégrée — aucune clé API requise.</strong><br/>
-        L'analyse est effectuée via Claude (Anthropic), directement intégré à cette application.</p>
+        <p>🔑 <strong>Clé API Anthropic :</strong><br/>
+        1. Allez sur <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com/settings/keys</a><br/>
+        2. Cliquez "Create Key" · Copiez la clé <code>sk-ant-...</code><br/>
+        3. Collez-la ci-dessus · Elle est stockée uniquement dans votre navigateur.</p>
       </div>
       <button class="save-settings-btn" id="saveSettings">ENREGISTRER</button>
     </div>
@@ -322,6 +329,7 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
 <script>
 /* ── CONFIG ── */
 const CFG = {
+  get key()   { return localStorage.getItem('abr_anthropic_key') || '' },
   get gas()   { return localStorage.getItem('abr_gas_url') || '' },
   get email() { return localStorage.getItem('abr_email') || 'opportunite+891172@vertuoza.com' },
 };
@@ -350,12 +358,13 @@ const el={
   successMeta:$('successMeta'),
   settingsBtn:$('settingsBtn'), settingsOverlay:$('settingsOverlay'),
   closeSettings:$('closeSettings'), saveSettings:$('saveSettings'),
-  gasUrl:$('gasUrl'), vertuozaEmail:$('vertuozaEmail'),
+  anthropicKey:$('anthropicKey'), gasUrl:$('gasUrl'), vertuozaEmail:$('vertuozaEmail'),
   toast:$('toast'),
 };
 
 /* ── INIT ── */
 function init(){
+  el.anthropicKey.value = CFG.key;
   el.gasUrl.value = CFG.gas;
   el.vertuozaEmail.value = CFG.email;
 
@@ -391,6 +400,8 @@ function init(){
       }
     }
   });
+
+  if(!CFG.key) setTimeout(()=>showToast('⚙️ Configurez votre clé API Anthropic dans les paramètres','neutral',5000),900);
 }
 
 /* ── MODE ── */
@@ -481,6 +492,7 @@ function hasInput(){ return !!(el.textInput.value.trim()||el.voiceTranscript.val
 /* ── ANALYZE ── */
 async function analyze(){
   if(!hasInput()){ showToast("Veuillez saisir du texte ou une image",'error'); return }
+  if(!CFG.key){ showToast('Clé API Anthropic manquante → Paramètres','error'); openSettings(); return }
   setLoading(el.analyzeBtn,true);
   S.rawText=collectInput();
   try{
@@ -494,7 +506,7 @@ async function analyze(){
   }finally{ setLoading(el.analyzeBtn,false) }
 }
 
-/* ── CLAUDE API (Anthropic) ── */
+/* ── CLAUDE API ── */
 async function callClaude(){
   const SYS = `Tu es un assistant commercial expert en rénovation et aménagement intérieur.
 Analyse le contenu fourni et extrais les informations de contact et de projet.
@@ -510,17 +522,12 @@ Règles :
 - Normalise les numéros de téléphone au format français (ex: 06 12 34 56 78)
 - Si une information est absente, laisse la chaîne vide`;
 
-  // Construire le contenu du message
   const userContent = [];
 
   if(S.imgB64){
     userContent.push({
       type: 'image',
-      source: {
-        type: 'base64',
-        media_type: S.imgMime,
-        data: S.imgB64
-      }
+      source: { type: 'base64', media_type: S.imgMime, data: S.imgB64 }
     });
   }
 
@@ -534,6 +541,8 @@ Règles :
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'x-api-key': CFG.key,
+      'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
@@ -552,7 +561,6 @@ Règles :
   const data = await res.json();
   const raw = data.content?.[0]?.text || '{}';
 
-  // Nettoyage robuste
   let cleaned = raw.replace(/```json|```/g,'').trim();
   const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
   if(jsonMatch) cleaned = jsonMatch[0];
@@ -619,10 +627,7 @@ async function send(){
       headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({to,subject,body,fields:d,imageBase64:S.imgB64||null,imageName:S.imgFile?.name||null}),
     }).catch(()=>{});
-    setTimeout(()=>{
-      setLoading(el.sendBtn,false);
-      showSuccess(d);
-    }, 1500);
+    setTimeout(()=>{ setLoading(el.sendBtn,false); showSuccess(d); }, 1500);
   }catch(e){
     showToast('Erreur : '+(e.message||'Réessayez'),'error');
     setLoading(el.sendBtn,false);
@@ -647,7 +652,7 @@ function showSuccess(d){
 async function createDropboxFolder(d){
   const name = [d.prenom, d.nom].filter(Boolean).join(' ');
   const city = d.ville || '';
-  if(!name){ console.log('Dropbox: pas de nom'); return; }
+  if(!name){ return; }
   const folderName = city ? name + ' - ' + city : name;
   const fromPath = '/AB RENOV 35/CLIENTS AB RENOV 35/OPPORTUNITES/Modèle Dossier Client AB RENOV';
   const toPath = '/AB RENOV 35/CLIENTS AB RENOV 35/OPPORTUNITES/' + folderName;
@@ -675,9 +680,10 @@ function reset(){
 }
 
 /* ── SETTINGS ── */
-function openSettings(){ el.settingsOverlay.classList.add('open'); el.gasUrl.value=CFG.gas; el.vertuozaEmail.value=CFG.email; }
+function openSettings(){ el.settingsOverlay.classList.add('open'); el.anthropicKey.value=CFG.key; el.gasUrl.value=CFG.gas; el.vertuozaEmail.value=CFG.email; }
 function closeSettingsPanel(){ el.settingsOverlay.classList.remove('open') }
 function saveSettingsData(){
+  localStorage.setItem('abr_anthropic_key', el.anthropicKey.value.trim());
   localStorage.setItem('abr_gas_url', el.gasUrl.value.trim());
   localStorage.setItem('abr_email', el.vertuozaEmail.value.trim()||'opportunite+891172@vertuoza.com');
   closeSettingsPanel(); showToast('Paramètres enregistrés ✓','success');
