@@ -313,6 +313,7 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
       <div class="result-section">
         <h3 class="result-section-title">Opportunité</h3>
         <div class="fields-grid">
+          <div class="field-group full"><label class="field-label">Donneur d'ordre</label><input type="text" id="rDonneurOrdre" class="field-input" placeholder="—"/></div>
           <div class="field-group full"><label class="field-label">Type de projet</label><input type="text" id="rProjet" class="field-input" placeholder="—"/></div>
           <div class="field-group full"><label class="field-label">Commentaires</label><textarea id="rCommentaires" class="field-input field-textarea" placeholder="—" rows="2"></textarea></div>
           <div class="field-group full"><label class="field-label">Directives / Urgence</label><textarea id="rDirectives" class="field-input field-textarea" placeholder="—" rows="2"></textarea></div>
@@ -392,7 +393,7 @@ const el={
   stepCapture:$('stepCapture'), stepResult:$('stepResult'), stepSuccess:$('stepSuccess'),
   rPrenom:$('rPrenom'), rNom:$('rNom'), rTel:$('rTel'), rEmail:$('rEmail'),
   rAdresse:$('rAdresse'), rVille:$('rVille'), rCp:$('rCp'),
-  rProjet:$('rProjet'), rCommentaires:$('rCommentaires'), rDirectives:$('rDirectives'),
+  rProjet:$('rProjet'), rCommentaires:$('rCommentaires'), rDirectives:$('rDirectives'), rDonneurOrdre:$('rDonneurOrdre'),
   confidenceFill:$('confidenceFill'), confidencePct:$('confidencePct'),
   successMeta:$('successMeta'),
   settingsBtn:$('settingsBtn'), settingsOverlay:$('settingsOverlay'),
@@ -634,19 +635,39 @@ async function analyze(){
 
 /* ── CLAUDE API ── */
 async function callClaude(){
-  const SYS = `Tu es un assistant commercial expert en rénovation et aménagement intérieur.
+  const SYS = `Tu es un assistant commercial expert en rénovation et aménagement intérieur travaillant pour AB RENOV, une entreprise de rénovation.
 Analyse le contenu fourni et extrais les informations de contact et de projet.
 Réponds UNIQUEMENT avec un objet JSON valide, sans markdown, sans backticks, sans explication.
 
 Structure JSON attendue :
-{"prenom":"","nom":"","telephone":"","email":"","adresse":"","ville":"","code_postal":"","type_projet":"","commentaires":"","directives":"","confidence":0}
+{"prenom":"","nom":"","telephone":"","email":"","adresse":"","ville":"","code_postal":"","type_projet":"","commentaires":"","directives":"","donneur_ordre":"","confidence":0}
 
-Règles :
-- confidence : score entre 0 et 100 représentant ta confiance dans l'extraction
-- type_projet : déduis le type de travaux (ex: rénovation salle de bain, pose de carrelage, peinture intérieure)
-- directives : urgence, rappels, consignes importantes mentionnées
-- Normalise les numéros de téléphone au format français (ex: 06 12 34 56 78)
-- Si une information est absente, laisse la chaîne vide`;
+Règles importantes :
+
+NOM/PRÉNOM (du client final) :
+- C'est le propriétaire du bien ou le client final, PAS le donneur d'ordre.
+- Si "nom du propriétaire" est mentionné explicitement, utilise-le en priorité.
+- Si pas de propriétaire identifié, prends le contact principal sur place (locataire, occupant).
+
+DONNEUR D'ORDRE :
+- C'est l'agence, le gestionnaire, l'assureur ou le professionnel qui mandate les travaux.
+- Exemples : Foncia, Dynaren, Domus, une agence immobilière, un assureur, un gestionnaire.
+- Mets uniquement le nom de la société ou de l'organisme (pas le nom du contact individuel).
+- Si c'est un particulier qui contacte directement (pas de société mandataire), laisse vide.
+
+NOM DE L'OPPORTUNITÉ (champ nom) :
+- Si propriétaire + donneur d'ordre : "NOM PROPRIÉTAIRE - NOM DONNEUR D'ORDRE" (ex: "LISSARRAGUE - FONCIA")
+- Si seulement propriétaire/contact sans donneur d'ordre pro : juste "NOM PROPRIÉTAIRE"
+- Toujours en MAJUSCULES.
+
+EMAIL : utilise l'email du donneur d'ordre (gestionnaire, agence...) en priorité. Sinon celui du client.
+TÉLÉPHONE : privilégie le propriétaire ou contact sur place.
+ADRESSE : adresse du bien/chantier, PAS l'adresse du bureau du donneur d'ordre.
+type_projet : déduis le type de travaux (ex: amélioration DPE, dégât des eaux, rénovation salle de bain)
+directives : urgence, numéros de dossier, codes d'accès, consignes importantes
+confidence : score entre 0 et 100
+Normalise les téléphones au format français (ex: 06 12 34 56 78)
+Si une information est absente, laisse la chaîne vide`;
 
   const userContent = [];
 
@@ -702,6 +723,7 @@ function populate(d){
   el.rTel.value=d.telephone||''; el.rEmail.value=d.email||'';
   el.rAdresse.value=d.adresse||''; el.rVille.value=d.ville||''; el.rCp.value=d.code_postal||'';
   el.rProjet.value=d.type_projet||''; el.rCommentaires.value=d.commentaires||''; el.rDirectives.value=d.directives||'';
+  el.rDonneurOrdre.value=d.donneur_ordre||'';
   const c=Math.min(100,Math.max(0,d.confidence||0));
   el.confidenceFill.style.width=c+'%'; el.confidencePct.textContent=c+'%';
 }
@@ -713,6 +735,7 @@ function collectResult(){
     telephone:el.rTel.value.trim(), email:el.rEmail.value.trim(),
     adresse:el.rAdresse.value.trim(), ville:el.rVille.value.trim(), cp:el.rCp.value.trim(),
     projet:el.rProjet.value.trim(), commentaires:el.rCommentaires.value.trim(), directives:el.rDirectives.value.trim(),
+    donneurOrdre:el.rDonneurOrdre.value.trim(),
   };
 }
 
