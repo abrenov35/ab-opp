@@ -616,8 +616,7 @@ function buildSubject(d){
   const n=[d.prenom,d.nom].filter(Boolean).join(' ');
   const c=d.ville?` — ${d.ville}`:'';
   const p=d.projet?` · ${d.projet.slice(0,40)}`:'';
-  return n?`Nouvelle opportunité : ${n}${c}${p}`:`Nouvelle opportunité commerciale${c}`;
-}
+return n?`${n}${c}${p}`:`Nouvelle opportunité${c}`;}
 
 /* ── SEND ── */
 async function send(){
