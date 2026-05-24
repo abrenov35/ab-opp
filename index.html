@@ -269,8 +269,8 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
         <span class="pj-size">Max 1 MB total</span>
       </div>
       <div class="pj-drop" id="pjDrop">
-        <input type="file" id="pjInput" accept="image/*,.pdf" multiple hidden/>
-        <p>Glissez vos fichiers ici ou cliquez</p>
+        <input type="file" id="pjInput" accept="image/*,.pdf,.zip,.ZIP" multiple hidden/>
+        <p>Glissez vos fichiers ici ou cliquez · JPG, PDF, ZIP</p>
         <button class="pick-btn" id="pjPickBtn">📂 Ajouter des fichiers</button>
       </div>
       <div class="pj-list" id="pjList"></div>
@@ -491,8 +491,11 @@ function clearImg(){
 const MAX_PJ_BYTES = 1 * 1024 * 1024; // 1 MB total
 
 function handlePJ(files){
+  const allowed = ['image/', 'application/pdf', 'application/zip', 'application/x-zip'];
   for(const file of files){
-    if(S.pjFiles.find(f=>f.name===file.name)) continue; // doublon
+    const ok = allowed.some(t => file.type.startsWith(t)) || file.name.match(/\.(pdf|jpg|jpeg|png|gif|zip)$/i);
+    if(!ok){ showToast(`⚠️ Format non supporté : ${file.name}`,'error',4000); continue; }
+    if(S.pjFiles.find(f=>f.name===file.name)) continue;
     const totalAfter = S.pjFiles.reduce((a,f)=>a+f.size,0) + file.size;
     if(totalAfter > MAX_PJ_BYTES){
       showToast(`⚠️ "${file.name}" dépasse la limite de 1 MB total — retirez un fichier d'abord`,'error',5000);
