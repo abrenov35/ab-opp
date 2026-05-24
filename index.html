@@ -318,6 +318,22 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
 
 </main>
 
+<!-- Modal email manquant -->
+<div class="settings-overlay" id="emailModal">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <h2>📧 Email requis</h2>
+      <button class="close-btn" id="closeEmailModal">✕</button>
+    </div>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:18px;line-height:1.6;">Vertuoza nécessite une adresse email pour créer l'opportunité. Veuillez en saisir une :</p>
+    <div class="field-group" style="margin-bottom:20px">
+      <label class="field-label">Adresse email du contact</label>
+      <input type="email" id="modalEmail" class="field-input" placeholder="exemple@email.com" autocomplete="off"/>
+    </div>
+    <button class="save-settings-btn" id="confirmEmailBtn">CONFIRMER ET ENVOYER</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -606,6 +622,17 @@ function buildSubject(d){
 /* ── SEND ── */
 async function send(){
   const d=collectResult();
+  if(!d.email){
+    // Ouvrir la modale pour saisir l'email
+    document.getElementById('emailModal').classList.add('open');
+    document.getElementById('modalEmail').value='';
+    setTimeout(()=>document.getElementById('modalEmail').focus(),300);
+    return;
+  }
+  await doSend(d);
+}
+
+async function doSend(d){
   const to=CFG.email;
   const subject=buildSubject(d);
   const body=buildBody(d);
@@ -638,6 +665,25 @@ function showSuccess(d){
   ].filter(Boolean).join('<br>');
   showStep('success');
 }
+
+/* ── MODAL EMAIL ── */
+document.getElementById('closeEmailModal').addEventListener('click',()=>{
+  document.getElementById('emailModal').classList.remove('open');
+});
+document.getElementById('confirmEmailBtn').addEventListener('click',async ()=>{
+  const email = document.getElementById('modalEmail').value.trim();
+  if(!email){ 
+    document.getElementById('modalEmail').style.borderColor='#c0392b';
+    showToast('Veuillez saisir un email valide','error');
+    return;
+  }
+  document.getElementById('emailModal').classList.remove('open');
+  // Mettre à jour le champ email dans le formulaire
+  el.rEmail.value = email;
+  // Envoyer
+  const d = collectResult();
+  await doSend(d);
+});
 
 /* ── DROPBOX ── */
 async function createDropboxFolder(d){
