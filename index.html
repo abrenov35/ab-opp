@@ -82,6 +82,21 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
 .voice-waves span:nth-child(1){animation-delay:0s}.voice-waves span:nth-child(2){animation-delay:.1s}.voice-waves span:nth-child(3){animation-delay:.2s}.voice-waves span:nth-child(4){animation-delay:.1s}.voice-waves span:nth-child(5){animation-delay:0s}
 @keyframes vwave{0%,100%{height:4px}50%{height:20px}}
 .voice-transcript{margin-top:4px;text-align:left;}
+.pj-zone{margin-top:10px;}
+.pj-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.pj-title{font-family:var(--cond);font-size:13px;font-weight:600;color:var(--text2);letter-spacing:.05em;}
+.pj-size{font-size:11px;color:var(--text3);}
+.pj-drop{background:var(--white);border:2px dashed var(--beige3);border-radius:var(--radius);padding:16px;text-align:center;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);}
+.pj-drop:hover,.pj-drop.drag-over{border-color:var(--navy);background:rgba(22,45,73,.03)}
+.pj-drop p{font-size:13px;color:var(--text3);margin-bottom:8px;}
+.pj-list{margin-top:8px;display:flex;flex-direction:column;gap:5px;}
+.pj-item{display:flex;align-items:center;justify-content:space-between;background:var(--beige);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;}
+.pj-item-name{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+.pj-item-size{font-size:11px;color:var(--text3);white-space:nowrap;}
+.pj-item-remove{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0;}
+.pj-item-remove:hover{color:#c0392b}
+.pj-total{font-size:11px;color:var(--text3);text-align:right;margin-top:4px;}
+.pj-total.over{color:#c0392b;font-weight:600;}
 .quick-note{margin-top:10px;}
 .quick-note-area{font-size:14px;}
 .analyze-btn{margin-top:18px;width:100%;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--navy);color:var(--white);border:none;border-radius:var(--radius);padding:17px;font-family:var(--cond);font-size:17px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:opacity .2s,transform .1s;box-shadow:0 4px 20px rgba(22,45,73,.2);}
@@ -248,6 +263,20 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
       </div>
     </div>
 
+    <div class="pj-zone">
+      <div class="pj-header">
+        <span class="pj-title">📎 Pièces jointes (optionnel)</span>
+        <span class="pj-size">Max 1 MB total</span>
+      </div>
+      <div class="pj-drop" id="pjDrop">
+        <input type="file" id="pjInput" accept="image/*,.pdf" multiple hidden/>
+        <p>Glissez vos fichiers ici ou cliquez</p>
+        <button class="pick-btn" id="pjPickBtn">📂 Ajouter des fichiers</button>
+      </div>
+      <div class="pj-list" id="pjList"></div>
+      <div class="pj-total" id="pjTotal"></div>
+    </div>
+
     <div class="quick-note">
       <textarea id="quickNote" class="text-area quick-note-area" placeholder="Note complémentaire (optionnel)..." rows="2"></textarea>
     </div>
@@ -346,7 +375,8 @@ const CFG = {
 
 /* ── STATE ── */
 let S = { mode:'text', imgFile:null, imgB64:null, imgMime:'image/jpeg',
-          voiceOn:false, recognition:null, rawText:'', extracted:{} };
+          voiceOn:false, recognition:null, rawText:'', extracted:{},
+          pjFiles:[] };
 
 /* ── DOM ── */
 const $=id=>document.getElementById(id);
@@ -399,6 +429,16 @@ function init(){
   el.settingsOverlay.addEventListener('click',e=>{if(e.target===el.settingsOverlay)closeSettingsPanel()});
   el.saveSettings.addEventListener('click',saveSettingsData);
 
+  document.getElementById('pjPickBtn').addEventListener('click', ()=>document.getElementById('pjInput').click());
+  // PJ
+  document.getElementById('pjInput').addEventListener('change', e => handlePJ(e.target.files));
+  const pjDrop = document.getElementById('pjDrop');
+  pjDrop.addEventListener('dragover', e=>{e.preventDefault();pjDrop.classList.add('drag-over')});
+  pjDrop.addEventListener('dragleave', ()=>pjDrop.classList.remove('drag-over'));
+  pjDrop.addEventListener('drop', e=>{e.preventDefault();pjDrop.classList.remove('drag-over');handlePJ(e.dataTransfer.files)});
+  pjDrop.addEventListener('click', e=>{if(e.target.tagName!=='BUTTON')document.getElementById('pjInput').click()});
+
+
   document.addEventListener('paste',e=>{
     const items=e.clipboardData?.items;
     if(!items)return;
@@ -448,7 +488,82 @@ function clearImg(){
   el.fileInput.value='';
 }
 
-/* ── VOICE ── */
+/* ── PJ MULTI-FICHIERS ── */
+const MAX_PJ_BYTES = 1 * 1024 * 1024; // 1 MB total
+
+function handlePJ(files){
+  for(const file of files){
+    if(S.pjFiles.find(f=>f.name===file.name)) continue; // doublon
+    const totalAfter = S.pjFiles.reduce((a,f)=>a+f.size,0) + file.size;
+    if(totalAfter > MAX_PJ_BYTES){
+      showToast(`⚠️ "${file.name}" dépasse la limite de 1 MB total — retirez un fichier d'abord`,'error',5000);
+      continue;
+    }
+    S.pjFiles.push(file);
+  }
+  renderPJList();
+}
+
+function renderPJList(){
+  const list = document.getElementById('pjList');
+  const total = document.getElementById('pjTotal');
+  list.innerHTML = '';
+  S.pjFiles.forEach((f,i)=>{
+    const item = document.createElement('div');
+    item.className = 'pj-item';
+    const btn = document.createElement('button');
+    btn.className = 'pj-item-remove';
+    btn.textContent = '✕';
+    btn.onclick = () => removePJ(i);
+    item.innerHTML = `<span class="pj-item-name">📄 ${f.name}</span><span class="pj-item-size">${(f.size/1024).toFixed(0)} Ko</span>`;
+    item.appendChild(btn);
+    list.appendChild(item);
+  });
+  const totalBytes = S.pjFiles.reduce((a,f)=>a+f.size,0);
+  total.textContent = S.pjFiles.length ? `Total : ${(totalBytes/1024).toFixed(0)} Ko / 1024 Ko` : '';
+  total.className = 'pj-total' + (totalBytes > MAX_PJ_BYTES ? ' over' : '');
+}
+
+function removePJ(i){
+  S.pjFiles.splice(i,1);
+  renderPJList();
+}
+
+async function pjToBase64(file){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = e => res(e.target.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function uploadPJToDropbox(folderPath){
+  if(!S.pjFiles.length) return { uploaded:0, errors:[] };
+  const errors = [];
+  let uploaded = 0;
+  for(const file of S.pjFiles){
+    try{
+      const b64 = await pjToBase64(file);
+      const res = await fetch('https://cool-cell-9dbd.abrenov35.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'dropbox_upload',
+          path: folderPath + '/' + file.name,
+          content: b64,
+          mime: file.type
+        })
+      });
+      const data = await res.json();
+      if(data.success) uploaded++;
+      else errors.push(file.name);
+    }catch(e){ errors.push(file.name); }
+  }
+  return { uploaded, errors };
+}
+
+
 function toggleVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){showToast('Reconnaissance vocale non supportée sur ce navigateur','error');return}
@@ -614,9 +729,10 @@ function buildBody(d){
 }
 function buildSubject(d){
   const n=[d.prenom,d.nom].filter(Boolean).join(' ');
-  const c=d.ville?` — ${d.ville}`:'';
-  const p=d.projet?` · ${d.projet.slice(0,40)}`:'';
-return n?`${n}${c}${p}`:`Nouvelle opportunité${c}`;}
+  const c=d.ville?` - ${d.ville}`:'';
+  const p=d.projet?` - ${d.projet.slice(0,40)}`:'';
+  return n?`${n}${c}${p}`:`Nouvelle opportunité${c}`;
+}
 
 /* ── SEND ── */
 async function send(){
@@ -654,6 +770,18 @@ async function doSend(d){
 /* ── SUCCESS ── */
 async function showSuccess(d){
   const dbResult = await createDropboxFolder(d);
+  
+  // Upload PJ si dossier créé
+  let pjMsg = '';
+  if(dbResult && dbResult.success && dbResult.path && S.pjFiles.length){
+    const pjResult = await uploadPJToDropbox(dbResult.path);
+    if(pjResult.uploaded > 0 && pjResult.errors.length === 0){
+      pjMsg = `\n📎 ${pjResult.uploaded} PJ déposée(s) dans Dropbox`;
+    } else if(pjResult.errors.length > 0){
+      pjMsg = `\n⚠️ PJ non déposées : ${pjResult.errors.join(', ')}`;
+    }
+  }
+
   const name=[d.prenom,d.nom].filter(Boolean).join(' ')||'—';
   el.successMeta.innerHTML=[
     `<strong>${name}</strong>`,
@@ -661,10 +789,11 @@ async function showSuccess(d){
     d.email?`✉️ ${d.email}`:'',
     d.ville?`📍 ${d.ville}`:'',
     d.projet?`🔧 ${d.projet}`:'',
+    S.pjFiles.length?`📎 ${S.pjFiles.length} PJ`:'',
   ].filter(Boolean).join('<br>');
   showStep('success');
   if(dbResult && dbResult.success){
-    showToast('✅ Opportunité envoyée et dossier Dropbox créé !','success', 4000);
+    showToast('✅ Opportunité envoyée et dossier Dropbox créé !' + pjMsg,'success', 5000);
   } else {
     showToast('⚠️ Envoyé à Vertuoza mais création Dropbox impossible','neutral', 5000);
   }
@@ -715,10 +844,13 @@ async function createDropboxFolder(d){
 
 /* ── RESET ── */
 function reset(){
-  S={mode:'text',imgFile:null,imgB64:null,imgMime:'image/jpeg',voiceOn:false,recognition:null,rawText:'',extracted:{}};
+  S={mode:'text',imgFile:null,imgB64:null,imgMime:'image/jpeg',voiceOn:false,recognition:null,rawText:'',extracted:{},pjFiles:[]};
   el.textInput.value=''; el.quickNote.value=''; el.voiceTranscript.value='';
   el.voiceStatus.textContent='Appuyez pour dicter';
   el.voiceWaves.classList.remove('active');
+  document.getElementById('pjList').innerHTML='';
+  document.getElementById('pjTotal').textContent='';
+  document.getElementById('pjInput').value='';
   clearImg(); switchMode('text'); showStep('capture');
 }
 
