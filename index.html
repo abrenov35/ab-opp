@@ -548,9 +548,9 @@ async function uploadPJToDropbox(folderPath){
   for(const file of S.pjFiles){
     try{
       const b64 = await pjToBase64(file);
-      const res = await fetch('https://cool-cell-9dbd.abrenov35.workers.dev', {
+      const res = await fetch('https://abrenov35-opportunite.abrenov35.workers.dev', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Worker-Secret': 'abrenov35-secret-2025' },
         body: JSON.stringify({
           action: 'dropbox_upload',
           path: folderPath + '/' + file.name,
@@ -684,13 +684,14 @@ Si une information est absente, laisse la chaîne vide`;
     userContent.push({ type: 'text', text: 'Analyse cette image et extrais les informations.' });
   }
 
-  const res = await fetch('https://cool-cell-9dbd.abrenov35.workers.dev', {
+  const res = await fetch('https://abrenov35-opportunite.abrenov35.workers.dev', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'X-Worker-Secret': 'abrenov35-secret-2025',
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 600,
       system: SYS,
       messages: [{ role: 'user', content: userContent }]
@@ -849,9 +850,9 @@ async function createDropboxFolder(d){
   const name = [d.prenom, d.nom].filter(Boolean).join(' ');
   if(!name){ console.log('Dropbox: nom manquant'); return { ok: false }; }
   try {
-    const res = await fetch('https://cool-cell-9dbd.abrenov35.workers.dev', {
+    const res = await fetch('https://abrenov35-opportunite.abrenov35.workers.dev', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Worker-Secret': 'abrenov35-secret-2025' },
       body: JSON.stringify({
         action: 'dropbox',
         prenom: d.prenom || '',
