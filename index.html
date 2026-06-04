@@ -760,6 +760,24 @@ function buildSubject(d){
   return n?`${n}${c}${p}`:`Nouvelle opportunité${c}`;
 }
 
+/* ── DUPLICATE CHECK ── */
+function getSentOps(){
+  try{ return JSON.parse(localStorage.getItem('abr_sent_ops')||'[]'); }catch{ return []; }
+}
+function recordSentOp(d){
+  const ops=getSentOps();
+  ops.push({nom:(d.nom||'').trim().toLowerCase(),adresse:(d.adresse||'').trim().toLowerCase(),ts:Date.now()});
+  localStorage.setItem('abr_sent_ops',JSON.stringify(ops.slice(-500)));
+}
+function isDuplicate(d){
+  const nom=(d.nom||'').trim().toLowerCase();
+  const adresse=(d.adresse||'').trim().toLowerCase();
+  return getSentOps().some(o=>
+    (nom && o.nom===nom) ||
+    (adresse && adresse.length>5 && o.adresse===adresse)
+  );
+}
+
 /* ── SEND ── */
 async function send(){
   const d=collectResult();
@@ -774,6 +792,10 @@ async function send(){
 }
 
 async function doSend(d){
+  if(isDuplicate(d)){
+    showToast('⚠️ Doublon détecté — même nom ou adresse déjà enregistrée','error',5000);
+    return;
+  }
   const to=CFG.email;
   const subject=buildSubject(d);
   const body=buildBody(d);
@@ -786,6 +808,7 @@ async function doSend(d){
       headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({to,subject,body,fields:d,imageBase64:S.imgB64||null,imageName:S.imgFile?.name||null}),
     }).catch(()=>{});
+    recordSentOp(d);
     setTimeout(()=>{ setLoading(el.sendBtn,false); showSuccess(d); }, 1500);
   }catch(e){
     showToast('Erreur : '+(e.message||'Réessayez'),'error');
