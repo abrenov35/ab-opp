@@ -808,6 +808,20 @@ async function doSend(d){
       headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({to,subject,body,fields:d,imageBase64:S.imgB64||null,imageName:S.imgFile?.name||null}),
     }).catch(()=>{});
+
+    // Journal AB-OPP : enregistrement parallèle dans le Google Sheet
+    fetch('https://script.google.com/macros/s/AKfycbwBsCct70CnSeVzGT_P6CndabDnAdEVvhVXf9DtXBon2uR11qYxi19oFRqsJbikY8Fa/exec',{
+      method:'POST',
+      mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({
+        prenom:d.prenom||'', nom:d.nom||'', telephone:d.telephone||'', email:d.email||'',
+        adresse:d.adresse||'', ville:d.ville||'', cp:d.cp||'', donneurOrdre:d.donneurOrdre||'',
+        projet:d.projet||'', commentaires:d.commentaires||'', directives:d.directives||'',
+        nbPJ:S.pjFiles.length
+      })
+    }).catch(err=>console.warn('AB-OPP Sheet:',err));
+
     recordSentOp(d);
     setTimeout(()=>{ setLoading(el.sendBtn,false); showSuccess(d); }, 1500);
   }catch(e){
@@ -937,5 +951,3 @@ init();
 </script>
 </body>
 </html>
-
-
