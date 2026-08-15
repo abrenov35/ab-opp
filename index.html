@@ -161,6 +161,11 @@ body{background:#f9fafb;font-family:Arial,Helvetica,sans-serif}
 .settings-btn{width:34px;height:28px;padding:0;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.42);border-radius:5px;color:white}
 .settings-btn:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.65);color:white}
 .settings-btn svg{width:16px;height:16px}
+.header .input-modes{display:flex;grid-template-columns:none;gap:6px;margin:0 0 0 auto}
+.header .mode-btn{height:28px;min-height:28px;flex-direction:row;gap:4px;padding:0 9px;background:transparent;border:1px solid rgba(255,255,255,.42);border-radius:5px;color:white;font-size:10px;font-weight:700;white-space:nowrap}
+.header .mode-btn.active{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.55);box-shadow:inset 0 -2px 0 #f59e0b}
+.header .mode-btn:not(.active):active{background:rgba(255,255,255,.12)}
+.header .mode-btn svg{width:14px;height:14px}
 .main{max-width:640px;padding:14px 12px 36px}
 .step-label{gap:8px;margin-bottom:12px}
 .step-num{font-size:9px;color:#6d28d9;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:4px;padding:3px 7px}
@@ -193,7 +198,11 @@ body{background:#f9fafb;font-family:Arial,Helvetica,sans-serif}
 @media(min-width:480px){.main{padding:16px 16px 40px}}
 @media(max-width:479px){
   .header-inner{padding-left:8px;padding-right:8px}
-  .app-title{font-size:12px}.app-title::after{margin:0 7px}.logo-sub{font-size:9px}.app-version{display:none}
+  .app-title{font-size:12px}.app-title::after{display:none}.logo-sub{display:none}.app-version{display:none}
+  .header .input-modes{gap:4px}
+  .header .mode-btn{padding:0 6px;font-size:9px}
+  .header .mode-btn svg{width:12px;height:12px}
+  .settings-btn{width:30px;margin-left:0}
   .main{padding:10px 8px 28px}.settings-panel{border-radius:10px 10px 0 0}
 }
 </style>
@@ -206,8 +215,22 @@ body{background:#f9fafb;font-family:Arial,Helvetica,sans-serif}
       <div style="display:flex;align-items:center;">
         <span class="app-title">AB OPPORTUNITÉS</span>
         <span class="logo-sub">Capture</span>
-        <span class="app-version">v1</span>
+        <span class="app-version">v2</span>
       </div>
+    </div>
+    <div class="input-modes">
+      <button class="mode-btn active" data-mode="text">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Texte
+      </button>
+      <button class="mode-btn" data-mode="image">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Photo
+      </button>
+      <button class="mode-btn" data-mode="fichier">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        Fichier
+      </button>
     </div>
     <button class="settings-btn" id="settingsBtn" title="Paramètres">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -247,21 +270,6 @@ body{background:#f9fafb;font-family:Arial,Helvetica,sans-serif}
     <div class="step-label">
       <span class="step-num">01</span>
       <span>Capturez l'information</span>
-    </div>
-
-    <div class="input-modes">
-      <button class="mode-btn active" data-mode="text">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        Texte
-      </button>
-      <button class="mode-btn" data-mode="image">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        Photo
-      </button>
-      <button class="mode-btn" data-mode="fichier">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-        Fichier
-      </button>
     </div>
 
     <div class="capture-zone active" id="modeText">
