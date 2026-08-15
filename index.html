@@ -96,8 +96,6 @@ body{font-family:var(--font);background:var(--beige);color:var(--text);min-heigh
 .pj-item-remove:hover{color:#c0392b}
 .pj-total{font-size:11px;color:var(--text3);text-align:right;margin-top:4px;}
 .pj-total.over{color:#c0392b;font-weight:600;}
-.quick-note{margin-top:10px;}
-.quick-note-area{font-size:14px;}
 .analyze-btn{margin-top:18px;width:100%;display:flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(135deg,var(--navy),#1e3a5f);color:var(--white);border:none;border-radius:var(--radius);padding:17px;font-family:var(--cond);font-size:17px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:opacity .2s,transform .1s;box-shadow:0 4px 20px rgba(22,45,73,.2);border-left:4px solid var(--lav);}
 .analyze-btn:active{opacity:.88;transform:scale(.99)}.analyze-btn:disabled{opacity:.5;cursor:not-allowed}
 .result-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow2);}
@@ -177,7 +175,7 @@ body{background:#f9fafb;font-family:Arial,Helvetica,sans-serif}
 .drop-zone{border:1px dashed #94a3b8;border-radius:6px;min-height:150px;box-shadow:none}
 .drop-content{padding:20px 14px}.drop-icon{margin-bottom:7px}.drop-text{font-size:12px}.drop-sub{font-size:10px;margin-bottom:10px}
 .pick-btn{min-height:32px;border-radius:5px;padding:6px 12px;font-family:Arial,Helvetica,sans-serif;font-size:10px;font-weight:700}
-.pj-zone,.quick-note{margin-top:8px}.pj-title{font-size:10px;font-weight:700}.pj-size{font-size:9px}
+.pj-zone{margin-top:8px}.pj-title{font-size:10px;font-weight:700}.pj-size{font-size:9px}
 .pj-drop{border:1px dashed #94a3b8;border-radius:6px;padding:10px;box-shadow:none}.pj-drop p{font-size:10px;margin-bottom:6px}
 .pj-item{border-radius:5px;padding:6px 9px}.pj-item-name{font-size:10px}.pj-item-size,.pj-total{font-size:9px}
 .analyze-btn{min-height:36px;margin-top:12px;padding:8px 12px;background:#1e3a8a;border:none;border-radius:5px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;box-shadow:none}
@@ -215,7 +213,7 @@ body{background:#f9fafb;font-family:Arial,Helvetica,sans-serif}
       <div style="display:flex;align-items:center;">
         <span class="app-title">AB OPPORTUNITÉS</span>
         <span class="logo-sub">Capture</span>
-        <span class="app-version">v2</span>
+        <span class="app-version">v3</span>
       </div>
     </div>
     <div class="input-modes">
@@ -344,10 +342,6 @@ body{background:#f9fafb;font-family:Arial,Helvetica,sans-serif}
       <div class="pj-total" id="pjTotal"></div>
     </div>
 
-    <div class="quick-note">
-      <textarea id="quickNote" class="text-area quick-note-area" placeholder="Note complémentaire (optionnel)..." rows="2"></textarea>
-    </div>
-
     <button class="analyze-btn" id="analyzeBtn">
       <span class="btn-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -450,7 +444,7 @@ const $=id=>document.getElementById(id);
 const el={
   modeBtns:document.querySelectorAll('.mode-btn'),
   modeText:$('modeText'), modeImage:$('modeImage'), modeVoice:$('modeVoice'),
-  textInput:$('textInput'), quickNote:$('quickNote'),
+  textInput:$('textInput'),
   dropZone:$('dropZone'), dropContent:$('dropContent'),
   fileInput:$('fileInput'), pickFileBtn:$('pickFileBtn'),
   imagePreview:$('imagePreview'), previewImg:$('previewImg'), removeImg:$('removeImg'),
@@ -677,7 +671,6 @@ function collectInput(){
   const parts=[];
   if(S.mode==='text'&&el.textInput.value.trim()) parts.push(el.textInput.value.trim());
   if(S.mode==='voice'&&el.voiceTranscript.value.trim()) parts.push(el.voiceTranscript.value.trim());
-  if(el.quickNote.value.trim()) parts.push('Note : '+el.quickNote.value.trim());
   if(S.mode==='image'&&el.textInput.value.trim()) parts.push(el.textInput.value.trim());
   return parts.join('\n\n');
 }
@@ -975,7 +968,7 @@ async function createDropboxFolder(d){
 /* ── RESET ── */
 function reset(){
   S={mode:'text',imgFile:null,imgB64:null,imgMime:'image/jpeg',voiceOn:false,recognition:null,rawText:'',extracted:{},pjFiles:[]};
-  el.textInput.value=''; el.quickNote.value=''; el.voiceTranscript.value='';
+  el.textInput.value=''; el.voiceTranscript.value='';
   el.voiceStatus.textContent='Appuyez pour dicter';
   el.voiceWaves.classList.remove('active');
   document.getElementById('pjList').innerHTML='';
