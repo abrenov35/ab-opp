@@ -13,8 +13,16 @@
     const base='https://raw.githubusercontent.com/abrenov35/ab-opp/c6c19233c82dd0f32ad92a5fbccc3428fd20833d/index.html';
     let html=await (await fetch(base,{cache:'no-store'})).text();
 
-    // V6
-    html=html.replace('<span class="app-version">v4</span>','<span class="app-version">v6</span>');
+    // V7
+    html=html.replace('<span class="app-version">v4</span>','<span class="app-version">v7</span>');
+
+    // Supprime le bandeau "01 Capturez l'information" sur l'écran principal.
+    html=html.replace(`    <div class="step-label">
+      <span class="step-num">01</span>
+      <span>Capturez l'information</span>
+    </div>
+
+`, '');
 
     // Mise en page plus sobre et professionnelle + boutons centrés.
     html=html.replace('</head>', `<style>
