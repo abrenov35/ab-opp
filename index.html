@@ -13,10 +13,10 @@
     const base='https://raw.githubusercontent.com/abrenov35/ab-opp/c6c19233c82dd0f32ad92a5fbccc3428fd20833d/index.html';
     let html=await (await fetch(base,{cache:'no-store'})).text();
 
-    // V7
-    html=html.replace('<span class="app-version">v4</span>','<span class="app-version">v7</span>');
+    // V8
+    html=html.replace('<span class="app-version">v4</span>','<span class="app-version">v8</span>');
 
-    // Supprime le bandeau "01 Capturez l'information" sur l'écran principal.
+    // Supprime le bandeau "01 Capturez l’information" sur l’écran principal.
     html=html.replace(`    <div class="step-label">
       <span class="step-num">01</span>
       <span>Capturez l'information</span>
@@ -24,95 +24,44 @@
 
 `, '');
 
+    // Supprime entièrement la zone "Pièces jointes (optionnel)" de l’affichage.
+    html=html.replace(/\s*<div class="pj-zone"[\s\S]*?<\/div>\s*(?=<button[^>]*id="analyzeBtn")/, '\n');
+
     // Mise en page plus sobre et professionnelle + boutons centrés.
     html=html.replace('</head>', `<style>
-      .input-modes{
-        justify-content:center!important;
-        margin-left:auto!important;
-        margin-right:auto!important;
-        max-width:430px!important;
-        gap:10px!important;
-      }
-      .header-actions,.toolbar-actions,.top-actions,.nav-actions{
-        justify-content:center!important;
-        margin-left:auto!important;
-        margin-right:auto!important;
-      }
+      .input-modes{justify-content:center!important;margin-left:auto!important;margin-right:auto!important;max-width:430px!important;gap:10px!important;}
+      .header-actions,.toolbar-actions,.top-actions,.nav-actions{justify-content:center!important;margin-left:auto!important;margin-right:auto!important;}
       .main{max-width:720px!important;padding:24px 18px 56px!important;}
       .step-label{justify-content:center!important;margin-bottom:18px!important;}
       .step-label>span:last-child{font-size:22px!important;}
-      .result-card{
-        border:1px solid rgba(22,45,73,.12)!important;
-        border-radius:16px!important;
-        box-shadow:0 8px 28px rgba(22,45,73,.10)!important;
-        background:#fff!important;
-      }
+      .pj-zone{display:none!important;}
+      .result-card{border:1px solid rgba(22,45,73,.12)!important;border-radius:16px!important;box-shadow:0 8px 28px rgba(22,45,73,.10)!important;background:#fff!important;}
       .result-section{padding:18px 20px!important;}
-      .result-section-title{
-        font-size:13px!important;
-        color:#162D49!important;
-        letter-spacing:.08em!important;
-        margin-bottom:14px!important;
-      }
+      .result-section-title{font-size:13px!important;color:#162D49!important;letter-spacing:.08em!important;margin-bottom:14px!important;}
       .fields-grid{grid-template-columns:1fr 1fr!important;gap:12px!important;}
       .field-group.full{grid-column:1/-1!important;}
-      .field-label{
-        font-size:11px!important;
-        color:#46566a!important;
-        letter-spacing:.04em!important;
-      }
+      .field-label{font-size:11px!important;color:#46566a!important;letter-spacing:.04em!important;}
       .field-label .req{color:#c0392b;font-weight:700;margin-left:3px;}
-      .field-input{
-        min-height:44px!important;
-        padding:10px 12px!important;
-        border-radius:9px!important;
-        background:#f8fafc!important;
-        border:1px solid #d9e0e8!important;
-        font-size:15px!important;
-      }
-      .field-input:focus{
-        background:#fff!important;
-        border-color:#24428f!important;
-        box-shadow:0 0 0 3px rgba(36,66,143,.10)!important;
-      }
-      .field-input.required-missing{
-        border-color:#c0392b!important;
-        background:#fff8f7!important;
-        box-shadow:0 0 0 3px rgba(192,57,43,.08)!important;
-      }
+      .field-input{min-height:44px!important;padding:10px 12px!important;border-radius:9px!important;background:#f8fafc!important;border:1px solid #d9e0e8!important;font-size:15px!important;}
+      .field-input:focus{background:#fff!important;border-color:#24428f!important;box-shadow:0 0 0 3px rgba(36,66,143,.10)!important;}
+      .field-input.required-missing{border-color:#c0392b!important;background:#fff8f7!important;box-shadow:0 0 0 3px rgba(192,57,43,.08)!important;}
       .result-actions{justify-content:center!important;gap:10px!important;margin-top:18px!important;}
       .send-btn{max-width:360px!important;flex:1 1 280px!important;}
       .back-btn{flex:0 0 auto!important;}
-      @media(max-width:600px){
-        .main{padding:16px 12px 42px!important;}
-        .result-section{padding:15px 14px!important;}
-        .fields-grid{grid-template-columns:1fr!important;gap:10px!important;}
-        .field-group,.field-group.full{grid-column:1/-1!important;}
-        .result-actions{flex-wrap:wrap!important;}
-        .send-btn{max-width:none!important;width:100%!important;}
-      }
+      @media(max-width:600px){.main{padding:16px 12px 42px!important;}.result-section{padding:15px 14px!important;}.fields-grid{grid-template-columns:1fr!important;gap:10px!important;}.field-group,.field-group.full{grid-column:1/-1!important;}.result-actions{flex-wrap:wrap!important;}.send-btn{max-width:none!important;width:100%!important;}}
     </style></head>`);
 
     // Champs obligatoires : Nom, téléphone, email, adresse postale complète et projet.
-    html=html.replace('<label class="field-label">Nom</label><input type="text" id="rNom" class="field-input" placeholder="—"/>',
-      '<label class="field-label">Nom <span class="req">*</span></label><input type="text" id="rNom" class="field-input" placeholder="Nom du client" required/>');
-    html=html.replace('<label class="field-label">Téléphone</label><input type="tel" id="rTel" class="field-input" placeholder="—"/>',
-      '<label class="field-label">Téléphone <span class="req">*</span></label><input type="tel" id="rTel" class="field-input" placeholder="06 00 00 00 00" required/>');
-    html=html.replace('<label class="field-label">Email</label><input type="email" id="rEmail" class="field-input" placeholder="—"/>',
-      '<label class="field-label">Email <span class="req">*</span></label><input type="email" id="rEmail" class="field-input" placeholder="client@email.fr" required/>');
-    html=html.replace('<label class="field-label">Adresse</label><input type="text" id="rAdresse" class="field-input" placeholder="—"/>',
-      '<label class="field-label">Adresse <span class="req">*</span></label><input type="text" id="rAdresse" class="field-input" placeholder="N° et rue" required/>');
-    html=html.replace('<label class="field-label">Ville</label><input type="text" id="rVille" class="field-input" placeholder="—"/>',
-      '<label class="field-label">Ville <span class="req">*</span></label><input type="text" id="rVille" class="field-input" placeholder="Ville" required/>');
-    html=html.replace('<label class="field-label">Code postal</label><input type="text" id="rCp" class="field-input" placeholder="—"/>',
-      '<label class="field-label">Code postal <span class="req">*</span></label><input type="text" id="rCp" class="field-input" placeholder="35000" inputmode="numeric" required/>');
-    html=html.replace('<label class="field-label">Type de projet</label><input type="text" id="rProjet" class="field-input" placeholder="—"/>',
-      '<label class="field-label">Projet <span class="req">*</span></label><input type="text" id="rProjet" class="field-input" placeholder="Ex. rénovation salle de bain" required/>');
+    html=html.replace('<label class="field-label">Nom</label><input type="text" id="rNom" class="field-input" placeholder="—"/>','<label class="field-label">Nom <span class="req">*</span></label><input type="text" id="rNom" class="field-input" placeholder="Nom du client" required/>');
+    html=html.replace('<label class="field-label">Téléphone</label><input type="tel" id="rTel" class="field-input" placeholder="—"/>','<label class="field-label">Téléphone <span class="req">*</span></label><input type="tel" id="rTel" class="field-input" placeholder="06 00 00 00 00" required/>');
+    html=html.replace('<label class="field-label">Email</label><input type="email" id="rEmail" class="field-input" placeholder="—"/>','<label class="field-label">Email <span class="req">*</span></label><input type="email" id="rEmail" class="field-input" placeholder="client@email.fr" required/>');
+    html=html.replace('<label class="field-label">Adresse</label><input type="text" id="rAdresse" class="field-input" placeholder="—"/>','<label class="field-label">Adresse <span class="req">*</span></label><input type="text" id="rAdresse" class="field-input" placeholder="N° et rue" required/>');
+    html=html.replace('<label class="field-label">Ville</label><input type="text" id="rVille" class="field-input" placeholder="—"/>','<label class="field-label">Ville <span class="req">*</span></label><input type="text" id="rVille" class="field-input" placeholder="Ville" required/>');
+    html=html.replace('<label class="field-label">Code postal</label><input type="text" id="rCp" class="field-input" placeholder="—"/>','<label class="field-label">Code postal <span class="req">*</span></label><input type="text" id="rCp" class="field-input" placeholder="35000" inputmode="numeric" required/>');
+    html=html.replace('<label class="field-label">Type de projet</label><input type="text" id="rProjet" class="field-input" placeholder="—"/>','<label class="field-label">Projet <span class="req">*</span></label><input type="text" id="rProjet" class="field-input" placeholder="Ex. rénovation salle de bain" required/>');
 
     // Contrôle obligatoire avant envoi.
-    html=html.replace(
-      'async function send(){\n  const d=collectResult();',
-      `async function send(){
+    html=html.replace('async function send(){\n  const d=collectResult();',`async function send(){
   const d=collectResult();
   const requiredFields=[
     {el:el.rNom,value:d.nom,label:'Nom'},
@@ -125,25 +74,11 @@
   ];
   requiredFields.forEach(f=>f.el.classList.remove('required-missing'));
   const missing=requiredFields.filter(f=>!f.value);
-  if(missing.length){
-    missing.forEach(f=>f.el.classList.add('required-missing'));
-    missing[0].el.focus();
-    showToast('⚠️ À compléter : '+missing.map(f=>f.label).join(', '),'error',5000);
-    return;
-  }
-  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(d.email)){
-    el.rEmail.classList.add('required-missing');
-    el.rEmail.focus();
-    showToast('⚠️ Adresse email invalide','error',4000);
-    return;
-  }`
-    );
+  if(missing.length){missing.forEach(f=>f.el.classList.add('required-missing'));missing[0].el.focus();showToast('⚠️ À compléter : '+missing.map(f=>f.label).join(', '),'error',5000);return;}
+  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(d.email)){el.rEmail.classList.add('required-missing');el.rEmail.focus();showToast('⚠️ Adresse email invalide','error',4000);return;}`);
 
     // Dropbox est désormais géré exclusivement par le nouveau GAS AB-OPP.
-    // Suppression de l'ancien appel direct au Worker Dropbox et de l'upload PJ via Worker.
-    html=html.replace(
-      /async function showSuccess\(d\)\{[\s\S]*?\n\}\n\n\/\* ── MODAL EMAIL ── \*\//,
-      `async function showSuccess(d){
+    html=html.replace(/async function showSuccess\(d\)\{[\s\S]*?\n\}\n\n\/\* ── MODAL EMAIL ── \*\//,`async function showSuccess(d){
   const name=[d.prenom,d.nom].filter(Boolean).join(' ')||'—';
   el.successMeta.innerHTML=[
     \`<strong>\${name}</strong>\`,
@@ -151,21 +86,15 @@
     d.email?\`✉️ \${d.email}\`:'',
     d.adresse?\`📍 \${d.adresse} \${d.cp||''} \${d.ville||''}\`:'',
     d.projet?\`🔧 \${d.projet}\`:'',
-    S.pjFiles.length?\`📎 \${S.pjFiles.length} PJ sélectionnée(s)\`:'',
   ].filter(Boolean).join('<br>');
   showStep('success');
   showToast('✅ Opportunité envoyée — AB-OPP traite le dossier Dropbox','success',5000);
 }
 
-/* ── MODAL EMAIL ── */`
-    );
+/* ── MODAL EMAIL ── */`);
 
-    document.open();
-    document.write(html);
-    document.close();
-  }catch(e){
-    document.getElementById('boot').textContent='Erreur de chargement : '+e.message;
-  }
+    document.open();document.write(html);document.close();
+  }catch(e){document.getElementById('boot').textContent='Erreur de chargement : '+e.message;}
 })();
 </script>
 </body>
