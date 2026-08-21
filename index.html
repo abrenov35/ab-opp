@@ -16,6 +16,12 @@
     // V5
     html=html.replace('<span class="app-version">v4</span>','<span class="app-version">v5</span>');
 
+    // Centrage de la barre de boutons, sans modifier leurs actions.
+    html=html.replace('</head>', `<style>
+      .input-modes{justify-content:center!important;margin-left:auto!important;margin-right:auto!important;}
+      .header-actions,.toolbar-actions,.top-actions,.nav-actions{justify-content:center!important;margin-left:auto!important;margin-right:auto!important;}
+    </style></head>`);
+
     // Dropbox est désormais géré exclusivement par le nouveau GAS AB-OPP.
     // Suppression de l'ancien appel direct au Worker Dropbox et de l'upload PJ via Worker.
     html=html.replace(
