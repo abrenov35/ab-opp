@@ -5,7 +5,7 @@
 <script>
 (async()=>{try{
 const base='https://raw.githubusercontent.com/abrenov35/ab-opp/c6c19233c82dd0f32ad92a5fbccc3428fd20833d/index.html';let html=await(await fetch(base,{cache:'no-store'})).text();
-html=html.replace('<span class="app-version">v4</span>','<span class="app-version">v13</span>');
+html=html.replace('<span class="app-version">v4</span>','<span class="app-version">v14</span>');
 html=html.replace('<span class="logo-sub">Capture</span>','<span class="logo-sub">Informations obligatoires</span>');
 html=html.replace(`    <div class="step-label">\n      <span class="step-num">01</span>\n      <span>Capturez l'information</span>\n    </div>\n\n`,'');
 html=html.replace(/\s*<div class="pj-zone"[\s\S]*?<\/div>\s*(?=<button[^>]*id="analyzeBtn")/,'\n');
@@ -19,5 +19,17 @@ html=html.replace(`function collectInput(){\n  const parts=[];`,`function collec
 html=html.replace("el.analyzeBtn.addEventListener('click',analyze);",`el.analyzeBtn.addEventListener('click',()=>{const ids=['quickNom','quickTel','quickEmail','quickAdresse','quickCp','quickVille','quickProjet'];const a=ids.map(id=>document.getElementById(id));a.forEach(x=>x.classList.remove('missing'));const m=a.filter(x=>!x.value.trim());if(m.length){m.forEach(x=>x.classList.add('missing'));m[0].focus();showToast('⚠️ Complétez les informations obligatoires','error',4000);return}const e=document.getElementById('quickEmail');if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(e.value.trim())){e.classList.add('missing');e.focus();showToast('⚠️ Adresse email invalide','error',4000);return}analyze()});`);
 html=html.replace('function populate(d){',`function populate(d){const g=id=>(document.getElementById(id)?.value||'').trim();if(g('quickNom'))d.nom=g('quickNom');if(g('quickTel'))d.telephone=g('quickTel');if(g('quickEmail'))d.email=g('quickEmail');if(g('quickAdresse'))d.adresse=g('quickAdresse');if(g('quickCp'))d.code_postal=g('quickCp');if(g('quickVille'))d.ville=g('quickVille');if(g('quickProjet'))d.type_projet=g('quickProjet');`);
 html=html.replace('<label class="field-label">Nom</label>','<label class="field-label">Nom <span class="req">*</span></label>').replace('<label class="field-label">Téléphone</label>','<label class="field-label">Téléphone <span class="req">*</span></label>').replace('<label class="field-label">Email</label>','<label class="field-label">Email <span class="req">*</span></label>').replace('<label class="field-label">Adresse</label>','<label class="field-label">Adresse <span class="req">*</span></label>').replace('<label class="field-label">Ville</label>','<label class="field-label">Ville <span class="req">*</span></label>').replace('<label class="field-label">Code postal</label>','<label class="field-label">Code postal <span class="req">*</span></label>').replace('<label class="field-label">Type de projet</label>','<label class="field-label">Projet <span class="req">*</span></label>');
+// V14 : les anciens contrôles de capture ont été retirés du DOM. Le reset historique
+// essayait encore d'écrire dedans. On rend ces accès inoffensifs et on vide les nouveaux champs.
+html=html.replace(/function reset\(\)\{/,'function reset(){');
+html=html.replace(/el\.preview\.innerHTML\s*=\s*['"]{2};?/g,"if(el.preview) el.preview.innerHTML='';");
+html=html.replace(/el\.fileList\.innerHTML\s*=\s*['"]{2};?/g,"if(el.fileList) el.fileList.innerHTML='';");
+html=html.replace(/el\.voiceTranscript\.value\s*=\s*['"]{2};?/g,"if(el.voiceTranscript) el.voiceTranscript.value='';");
+html=html.replace(/el\.textInput\.value\s*=\s*['"]{2};?/g,"if(el.textInput) el.textInput.value='';");
+html=html.replace(/el\.imgPreview\.innerHTML\s*=\s*['"]{2};?/g,"if(el.imgPreview) el.imgPreview.innerHTML='';");
+html=html.replace(/el\.photoPreview\.innerHTML\s*=\s*['"]{2};?/g,"if(el.photoPreview) el.photoPreview.innerHTML='';");
+html=html.replace(/el\.fileInput\.value\s*=\s*['"]{2};?/g,"if(el.fileInput) el.fileInput.value='';");
+html=html.replace(/el\.photoInput\.value\s*=\s*['"]{2};?/g,"if(el.photoInput) el.photoInput.value='';");
+html=html.replace(/(function reset\(\)\{)/,`$1\n  ['quickNom','quickTel','quickEmail','quickAdresse','quickCp','quickVille','quickProjet'].forEach(id=>{const x=document.getElementById(id);if(x){x.value='';x.classList.remove('missing');}});`);
 document.open();document.write(html);document.close();}catch(e){document.getElementById('boot').textContent='Erreur de chargement : '+e.message}})();
 </script></body></html>
