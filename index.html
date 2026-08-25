@@ -6,9 +6,16 @@
 (async()=>{try{
   const base='https://raw.githubusercontent.com/abrenov35/ab-opp/6697631626b47d4bcaecb74ec3247ace39f4e9e2/index.html';
   let src=await(await fetch(base,{cache:'no-store'})).text();
-  src=src.replace("'<span class=\"app-version\">v4</span>','<span class=\"app-version\">v18</span>'","'<span class=\"app-version\">v4</span>','<span class=\"app-version\">v19</span>'");
+  src=src.replace("'<span class=\"app-version\">v4</span>','<span class=\"app-version\">v18</span>'","'<span class=\"app-version\">v4</span>','<span class=\"app-version\">v20</span>'");
   const marker='document.open();document.write(html);document.close();';
-  const extra=`html=html.replace('<label>Nom *<input id="quickNom"','<label class="wide">Nom *<input id="quickNom"');\nhtml=html.replace(/<div class="field-group full">(?=<label class="field-label">Téléphone(?: |<))/g,'<div class="field-group">');\nhtml=html.replace(/<div class="field-group full">(?=<label class="field-label">Email(?: |<))/g,'<div class="field-group">');\n`;
+  const extra=`html=html.replace('</head>',\`<style>
+.required-entry-grid label:has(#quickNom){grid-column:1/-1!important}
+.required-entry-grid label:has(#quickTel){grid-column:1!important}
+.required-entry-grid label:has(#quickTel2){grid-column:2!important}
+.required-entry-grid label:has(#quickEmail){grid-column:1!important}
+.required-entry-grid label:has(#quickEmail2){grid-column:2!important}
+.fields-grid .field-group:has(#rTel),.fields-grid .field-group:has(#rTel2),.fields-grid .field-group:has(#rEmail),.fields-grid .field-group:has(#rEmail2){grid-column:auto!important}
+</style></head>\`);\n`;
   if(!src.includes(marker))throw new Error('Point insertion alignement introuvable');
   src=src.replace(marker,extra+marker);
   document.open();document.write(src);document.close();
