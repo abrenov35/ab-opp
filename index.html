@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>AB Renov · Capture</title></head>
-<body><div id="boot" style="font-family:Arial,Helvetica,sans-serif;padding:30px;text-align:center;color:#172554">Chargement AB OPPORTUNITÉS…</div>
+<body><div id="boot" style="font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:30px;text-align:center;color:#285943">Chargement AB OPPORTUNITÉS…</div>
 <script>
 (async()=>{try{
   const base='https://raw.githubusercontent.com/abrenov35/ab-opp/6697631626b47d4bcaecb74ec3247ace39f4e9e2/index.html';
@@ -9,16 +9,33 @@
   src=src.replace("'<span class=\"app-version\">v4</span>','<span class=\"app-version\">v18</span>'","'<span class=\"app-version\">v4</span>','<span class=\"app-version\">v21</span>'");
   const marker='document.open();document.write(html);document.close();';
   const extra=`html=html.replace('</head>',\`<style>
+:root{--ab-green:#285943;--ab-green-soft:#e8efeb;--ab-bg:#f4f6f8;--ab-text:#1f2937;--ab-muted:#6b7280;--ab-border:#e5e7eb}
+html,body{background:var(--ab-bg)!important;color:var(--ab-text)!important;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+body{margin:0!important}
+.header,.topbar,.app-header{background:transparent!important;color:var(--ab-text)!important;box-shadow:none!important;border:0!important}
+.logo,.logo-main,.brand,.app-title,h1,h2,h3{color:var(--ab-text)!important}
+.logo-sub,.subtitle,.step-label,.field-label,.required-entry-grid label,.opp-pj-info{color:var(--ab-muted)!important}
+.main{max-width:980px!important;margin:0 auto!important;padding:24px!important}
+.step,.required-entry-card,.result-card,.success-card,.capture-card,.form-card,.card{background:#fff!important;border:1px solid var(--ab-border)!important;border-radius:16px!important;box-shadow:0 8px 24px rgba(0,0,0,.04)!important}
+.required-entry-card{padding:20px!important;margin-bottom:16px!important}
+.required-entry-grid{gap:12px!important}
 .required-entry-grid label:has(#quickNom){grid-column:1/-1!important}
 .required-entry-grid label:has(#quickTel){grid-column:1!important}
 .required-entry-grid label:has(#quickTel2){grid-column:2!important}
 .required-entry-grid label:has(#quickEmail){grid-column:1!important}
 .required-entry-grid label:has(#quickEmail2){grid-column:2!important}
+.required-entry-grid input,.required-entry-grid textarea,.field-input,input,textarea,select{background:#fff!important;border:1px solid #cbd5e1!important;border-radius:10px!important;color:var(--ab-text)!important;box-shadow:none!important}
+.required-entry-grid input:focus,.required-entry-grid textarea:focus,.field-input:focus,input:focus,textarea:focus,select:focus{border-color:var(--ab-green)!important;box-shadow:0 0 0 3px rgba(40,89,67,.12)!important;outline:none!important}
 .fields-grid .field-group:has(#rTel),.fields-grid .field-group:has(#rTel2),.fields-grid .field-group:has(#rEmail),.fields-grid .field-group:has(#rEmail2){grid-column:auto!important}
-.opp-pj-box{grid-column:1/-1;border:1px dashed #b7c4d3;border-radius:10px;padding:11px 12px;background:#f8fafc;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.opp-pj-btn{border:1px solid #c8d3df;background:#fff;color:#24436b;border-radius:8px;padding:9px 13px;font:700 12px Arial,sans-serif;cursor:pointer;white-space:nowrap}
-.opp-pj-btn:hover{background:#eef4fa}.opp-pj-info{font-size:11px;color:#65758a;flex:1;min-width:150px}.opp-pj-box .pj-list{width:100%;margin-top:2px}.opp-pj-box .pj-total{width:100%;margin-top:0}
-@media(max-width:600px){.opp-pj-box{align-items:stretch}.opp-pj-btn{width:100%}}
+button,.analyze-btn,.primary-btn,.save-btn,.submit-btn,.result-actions button{background:var(--ab-green)!important;color:#fff!important;border:0!important;border-radius:10px!important;box-shadow:none!important;font-family:inherit!important;font-weight:700!important}
+button:hover,.analyze-btn:hover,.primary-btn:hover,.save-btn:hover,.submit-btn:hover{filter:brightness(.96)!important;transform:none!important}
+.secondary-btn,.ghost-btn,.back-btn,.cancel-btn{background:var(--ab-green-soft)!important;color:var(--ab-green)!important;border:0!important}
+.step-num,.badge,.status-badge,.pill{background:var(--ab-green-soft)!important;color:var(--ab-green)!important;border-color:transparent!important}
+.opp-pj-box{grid-column:1/-1;border:1px dashed #cbd5e1;border-radius:12px;padding:12px;background:#f8fafc;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.opp-pj-btn{border:0!important;background:var(--ab-green-soft)!important;color:var(--ab-green)!important;border-radius:10px!important;padding:10px 14px!important;font:700 12px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;cursor:pointer;white-space:nowrap}
+.opp-pj-btn:hover{background:#dde8e1!important}.opp-pj-info{font-size:11px;flex:1;min-width:150px}.opp-pj-box .pj-list{width:100%;margin-top:2px}.opp-pj-box .pj-total{width:100%;margin-top:0}
+.toast,.modal-content,.modal-card{border-radius:14px!important;font-family:inherit!important}
+@media(max-width:600px){.main{padding:14px!important}.required-entry-card{padding:14px!important}.opp-pj-box{align-items:stretch}.opp-pj-btn{width:100%}}
 </style></head>\`);
 html=html.replace('<label class="wide">Projet *<textarea id="quickProjet" rows="2" placeholder="Décrivez brièvement le projet"></textarea></label></div></div>','<label class="wide">Projet *<textarea id="quickProjet" rows="2" placeholder="Décrivez brièvement le projet"></textarea></label><div class="opp-pj-box"><button id="pjPickBtn" class="opp-pj-btn" type="button">📎 Ajouter des pièces</button><input id="pjInput" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.zip,application/pdf,image/*,application/zip" style="display:none"><span class="opp-pj-info">Facultatif — les fichiers seront déposés dans le dossier Dropbox créé pour l’opportunité.</span><div id="pjList" class="pj-list"></div><div id="pjTotal" class="pj-total"></div></div></div></div>');
 `;
