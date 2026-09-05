@@ -6,7 +6,7 @@
 (async()=>{try{
   const base='https://raw.githubusercontent.com/abrenov35/ab-opp/6697631626b47d4bcaecb74ec3247ace39f4e9e2/index.html';
   let src=await(await fetch(base,{cache:'no-store'})).text();
-  src=src.replace("'<span class=\"app-version\">v4</span>','<span class=\"app-version\">v18</span>'","'<span class=\"app-version\">v4</span>','<span class=\"app-version\">v23</span>'");
+  src=src.replace("'<span class=\"app-version\">v4</span>','<span class=\"app-version\">v18</span>'","'<span class=\"app-version\">v4</span>','<span class=\"app-version\">v24</span>'");
   const marker='document.open();document.write(html);document.close();';
   const extra=`html=html.replace('</head>',\`<style>
 :root{--ab-green:#087443;--ab-green-dark:#05643a;--ab-green-soft:#eaf8f0;--ab-blue:#087cf0;--ab-blue-soft:#eaf4ff;--ab-navy:#102552;--ab-bg:#f4f7fa;--ab-text:#243b63;--ab-muted:#657797;--ab-border:#b9cbe4}
@@ -20,7 +20,7 @@ button,.analyze-btn,.primary-btn,.save-btn,.submit-btn,.result-actions button{ba
 @media(max-width:600px){.main{padding:8px!important}.required-entry-card{padding:14px 12px 14px 52px!important}.required-entry-card:before{font-size:13px;margin-left:-40px;padding-left:40px}.required-entry-card:after{display:none}.required-entry-grid{gap:10px!important}.required-entry-grid label:before{left:-40px;width:30px;height:30px;font-size:16px}.opp-pj-box{align-items:stretch}.opp-pj-btn{width:100%;min-width:0}.opp-pj-info{min-width:0}}
 </style></head>\`);
 html=html.replace('<label class="wide">Projet *<textarea id="quickProjet" rows="2" placeholder="Décrivez brièvement le projet"></textarea></label></div></div>','<label class="wide">Projet *<textarea id="quickProjet" maxlength="500" rows="2" placeholder="Décrivez brièvement le projet"></textarea><span id="oppProjectCount" class="opp-project-count">0 / 500</span></label><div class="opp-pj-box"><button id="pjPickBtn" class="opp-pj-btn" type="button">📎 &nbsp; Ajouter des pièces</button><input id="pjInput" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx,.zip,application/pdf,image/*" style="display:none"><span class="opp-pj-info">Facultatif — les fichiers seront déposés dans le dossier Dropbox créé pour l’opportunité.<small>Formats acceptés : PDF, JPG, PNG, DOC, DOCX, XLS, XLSX (max. 20 Mo par fichier)</small></span><div id="pjList" class="pj-list"></div><div id="pjTotal" class="pj-total"></div></div></div></div>');
-html=html.replace('</body>','<script>(function(){var t=document.getElementById("quickProjet"),c=document.getElementById("oppProjectCount");if(t&&c){function u(){c.textContent=String(t.value.length)+" / 500"}t.addEventListener("input",u);u()}})();<\\/script></body>');
+html=html.replace('</body>','<script>(function(){var t=document.getElementById("quickProjet"),c=document.getElementById("oppProjectCount");if(t&&c){function u(){c.textContent=String(t.value.length)+" / 500"}t.addEventListener("input",u);u()}function patchOk(){var buttons=[].slice.call(document.querySelectorAll("button"));var b=buttons.find(function(x){return /nouvelle opportunit/i.test(String(x.textContent||""))});if(!b)return false;b.textContent="✓ OK";b.onclick=function(ev){ev.preventDefault();try{window.parent.postMessage({type:"AB_OPP_HOME"},"*")}catch(e){}return false};return true}var n=0,iv=setInterval(function(){n++;if(patchOk()||n>120)clearInterval(iv)},250)})();<\\/script></body>');
 `;
   if(!src.includes(marker))throw new Error('Point insertion pièces jointes introuvable');
   src=src.replace(marker,extra+marker);
